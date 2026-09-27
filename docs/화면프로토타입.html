@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>책 요약 앱 화면 프로토타입</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
+<style>
+/* ============ M3 color roles ============ */
+:root{
+  --primary:#006A60;            --on-primary:#FFFFFF;
+  --primary-container:#9EF2E4;  --on-primary-container:#00201C;
+  --secondary:#4A635F;          --secondary-container:#CCE8E3;
+  --on-secondary-container:#06201C;
+  --tertiary:#456179;           --tertiary-container:#CBE6FF;
+  --error:#BA1A1A;              --on-error:#FFFFFF;
+  --error-container:#FFDAD6;    --on-error-container:#410002;
+  --surface:#F4FBF8;
+  --surface-container-lowest:#FFFFFF;
+  --surface-container-low:#EEF5F2;
+  --surface-container:#E8EFEC;
+  --surface-container-high:#E2E9E6;
+  --surface-container-highest:#DDE4E1;
+  --on-surface:#171D1B;         --on-surface-variant:#3F4947;
+  --outline:#6F7977;            --outline-variant:#BEC9C6;
+  --inverse-surface:#2B3230;    --inverse-on-surface:#ECF2EF;
+  --scrim:rgba(0,0,0,.32);
+  --page:#DCE4E1;
+  --kp-definition:#4F6470;  --kp-definition-bg:#E3EAEE;
+  --kp-mechanism:#3B4E9B;   --kp-mechanism-bg:#E2E6F8;
+  --kp-cause:#8F5510;       --kp-cause-bg:#F8EADA;
+  --kp-example:#2E6B3E;     --kp-example-bg:#DFF0E2;
+  --kp-comparison:#6B3F8F;  --kp-comparison-bg:#F0E5F8;
+  --kp-caution:#B3261E;     --kp-caution-bg:#FBE3E1;
+  --elev1:0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+  --elev2:0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+  --elev3:0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.30);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --primary:#82D5C8;            --on-primary:#003731;
+    --primary-container:#005048;  --on-primary-container:#9EF2E4;
+    --secondary:#B1CCC7;          --secondary-container:#324B47;
+    --on-secondary-container:#CCE8E3;
+    --tertiary:#ACCAE6;           --tertiary-container:#2D4960;
+    --error:#FFB4AB;              --on-error:#690005;
+    --error-container:#93000A;    --on-error-container:#FFDAD6;
+    --surface:#0E1513;
+    --surface-container-lowest:#090F0E;
+    --surface-container-low:#171D1B;
+    --surface-container:#1B211F;
+    --surface-container-high:#252B29;
+    --surface-container-highest:#303634;
+    --on-surface:#DDE4E1;         --on-surface-variant:#BEC9C6;
+    --outline:#889391;            --outline-variant:#3F4947;
+    --inverse-surface:#DDE4E1;    --inverse-on-surface:#2B3230;
+    --page:#060B0A;
+    --kp-definition:#AFC2CC;  --kp-definition-bg:#26333A;
+    --kp-mechanism:#A8B6F5;   --kp-mechanism-bg:#242C4D;
+    --kp-cause:#E0A45C;       --kp-cause-bg:#3A2A14;
+    --kp-example:#8FD3A0;     --kp-example-bg:#1B3524;
+    --kp-comparison:#D0AEF0;  --kp-comparison-bg:#2F2140;
+    --kp-caution:#F2B8B5;     --kp-caution-bg:#44201D;
+  }
+}
+:root[data-theme="dark"]{
+  --primary:#82D5C8;            --on-primary:#003731;
+  --primary-container:#005048;  --on-primary-container:#9EF2E4;
+  --secondary:#B1CCC7;          --secondary-container:#324B47;
+  --on-secondary-container:#CCE8E3;
+  --tertiary:#ACCAE6;           --tertiary-container:#2D4960;
+  --error:#FFB4AB;              --on-error:#690005;
+  --error-container:#93000A;    --on-error-container:#FFDAD6;
+  --surface:#0E1513;
+  --surface-container-lowest:#090F0E;
+  --surface-container-low:#171D1B;
+  --surface-container:#1B211F;
+  --surface-container-high:#252B29;
+  --surface-container-highest:#303634;
+  --on-surface:#DDE4E1;         --on-surface-variant:#BEC9C6;
+  --outline:#889391;            --outline-variant:#3F4947;
+  --inverse-surface:#DDE4E1;    --inverse-on-surface:#2B3230;
+  --page:#060B0A;
+  --kp-definition:#AFC2CC;  --kp-definition-bg:#26333A;
+  --kp-mechanism:#A8B6F5;   --kp-mechanism-bg:#242C4D;
+  --kp-cause:#E0A45C;     --kp-cause-bg:#3A2A14;
+  --kp-example:#8FD3A0;   --kp-example-bg:#1B3524;
+  --kp-comparison:#D0AEF0;  --kp-comparison-bg:#2F2140;
+  --kp-caution:#F2B8B5;   --kp-caution-bg:#44201D;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--page);
+  color:var(--on-surface);
+  font-family:"Noto Sans KR",Roboto,system-ui,sans-serif;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.msym{
+  font-family:"Material Symbols Rounded";font-weight:400;font-style:normal;
+  font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;
+  display:inline-block;white-space:nowrap;direction:ltr;
+  -webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;
+}
+
+/* ============ page chrome ============ */
+.page{max-width:1080px;margin:0 auto;padding-left:20px;padding-right:20px;padding-block:32px 56px}
+.head{margin-bottom:24px}
+.head .kicker{
+  font-family:Roboto,sans-serif;font-size:11px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--primary);margin:0 0 8px;
+}
+.head h1{
+  font-family:Roboto,"Noto Sans KR",sans-serif;font-weight:400;
+  font-size:clamp(28px,5vw,36px);line-height:1.2;margin:0 0 10px;
+  letter-spacing:-.01em;text-wrap:balance;
+}
+.head p{margin:0;color:var(--on-surface-variant);font-size:14px;max-width:62ch}
+
+.screenbar{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 26px}
+.sbtn{
+  font:500 13px/1 Roboto,"Noto Sans KR",sans-serif;
+  padding:8px 14px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);
+  transition:background .15s,color .15s,border-color .15s;
+}
+.sbtn:hover{background:var(--surface-container-high)}
+.sbtn[aria-current="true"]{
+  background:var(--secondary-container);color:var(--on-secondary-container);
+  border-color:transparent;
+}
+.sbtn:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+.stage{display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start}
+@media (max-width:820px){.stage{grid-template-columns:1fr}}
+
+/* ============ device ============ */
+.device{
+  width:360px;height:740px;border-radius:36px;background:var(--surface);
+  box-shadow:var(--elev3);overflow:hidden;position:relative;
+  border:8px solid var(--inverse-surface);justify-self:center;
+  display:flex;flex-direction:column;
+}
+.statusbar{
+  height:28px;flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;font:500 11px/1 Roboto,sans-serif;color:var(--on-surface-variant);
+  background:var(--surface);
+}
+.statusbar .right{display:flex;gap:5px;align-items:center}
+.screen{display:none;flex:1;flex-direction:column;min-height:0;background:var(--surface)}
+.screen.on{display:flex}
+
+/* top app bar */
+.appbar{
+  flex:none;height:60px;display:flex;align-items:center;gap:4px;padding:0 6px 0 4px;
+  background:var(--surface);color:var(--on-surface);
+}
+.appbar.scrolled{background:var(--surface-container)}
+.appbar h2{
+  font-family:Roboto,"Noto Sans KR",sans-serif;font-weight:400;font-size:20px;
+  margin:0;padding-left:8px;flex:1;letter-spacing:.01em;
+}
+.iconbtn{
+  width:40px;height:40px;border-radius:50%;border:none;background:transparent;
+  color:var(--on-surface-variant);display:grid;place-items:center;cursor:pointer;
+  flex:none;transition:background .15s;
+}
+.iconbtn:hover{background:var(--surface-container-high)}
+.iconbtn:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+
+.body{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 16px 16px;min-height:0}
+.body::-webkit-scrollbar{width:0}
+.bottombar{
+  flex:none;padding:12px 16px 18px;background:var(--surface);
+  display:flex;gap:10px;border-top:1px solid transparent;
+}
+
+/* ============ M3 components ============ */
+.btn{
+  flex:1;height:44px;border-radius:22px;border:none;cursor:pointer;
+  font:500 14px/1 Roboto,"Noto Sans KR",sans-serif;letter-spacing:.01em;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:filter .15s,background .15s;
+}
+.btn:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.btn.filled{background:var(--primary);color:var(--on-primary);box-shadow:var(--elev1)}
+.btn.filled:hover{filter:brightness(1.08)}
+.btn.filled:disabled{background:var(--surface-container-highest);color:var(--on-surface-variant);opacity:.6;box-shadow:none;cursor:default}
+.btn.tonal{background:var(--secondary-container);color:var(--on-secondary-container)}
+.btn.outlined{background:transparent;color:var(--primary);border:1px solid var(--outline)}
+.btn.text{background:transparent;color:var(--primary);flex:none;padding:0 14px}
+
+.fab{
+  position:absolute;right:20px;bottom:24px;height:56px;padding:0 20px;
+  border-radius:16px;border:none;cursor:pointer;background:var(--primary-container);
+  color:var(--on-primary-container);box-shadow:var(--elev3);
+  display:inline-flex;align-items:center;gap:10px;
+  font:500 14px/1 Roboto,"Noto Sans KR",sans-serif;
+}
+.fab:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+.card{
+  background:var(--surface-container-low);border-radius:12px;padding:14px 16px;
+  margin-bottom:10px;cursor:pointer;transition:background .15s;
+}
+.card:hover{background:var(--surface-container)}
+.card.outlined{background:transparent;border:1px solid var(--outline-variant)}
+.card .t{font:500 16px/1.4 Roboto,"Noto Sans KR",sans-serif;margin:0 0 3px}
+.card .s{font-size:12px;color:var(--on-surface-variant);margin:0}
+.card .row{display:flex;align-items:center;gap:8px;justify-content:space-between}
+
+.badge{
+  display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 9px;
+  border-radius:8px;font:500 11px/1 Roboto,"Noto Sans KR",sans-serif;white-space:nowrap;
+}
+.badge.ok{background:var(--secondary-container);color:var(--on-secondary-container)}
+.badge.err{background:var(--error-container);color:var(--on-error-container)}
+.badge.wait{background:var(--tertiary-container);color:var(--on-surface)}
+
+.field{
+  border:1px solid var(--outline);border-radius:10px;padding:12px 14px;
+  background:transparent;font-size:13px;line-height:1.75;color:var(--on-surface);
+  max-height:290px;overflow-y:auto;position:relative;
+}
+.field .lbl{
+  position:absolute;top:-8px;left:10px;background:var(--surface);padding:0 5px;
+  font-size:11px;color:var(--primary);font-weight:500;
+}
+
+.banner{
+  background:var(--tertiary-container);color:var(--on-surface);
+  border-radius:10px;padding:11px 14px;font-size:12px;margin-bottom:12px;
+  display:flex;gap:9px;align-items:flex-start;
+}
+.banner .msym{font-size:18px;color:var(--tertiary);flex:none}
+
+.progress-line{height:4px;border-radius:2px;background:var(--surface-container-highest);overflow:hidden;position:relative}
+.progress-line i{position:absolute;inset:0;width:40%;background:var(--primary);border-radius:2px;animation:slide 1.6s ease-in-out infinite}
+@keyframes slide{0%{left:-40%}100%{left:100%}}
+
+.spinner{
+  width:18px;height:18px;border-radius:50%;flex:none;
+  border:2.5px solid currentColor;border-right-color:transparent;
+  animation:spin .8s linear infinite;
+}
+.spinner.lg{width:52px;height:52px;border-width:4px;color:var(--primary)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.keypoint{
+  display:grid;grid-template-columns:3px 1fr;gap:13px;
+  padding:0 0 16px;margin-bottom:16px;
+  border-bottom:1px solid var(--outline-variant);
+}
+.keypoint:last-of-type{border-bottom:none;margin-bottom:4px}
+.keypoint .stripe{border-radius:2px;background:var(--kp);min-height:100%}
+.keypoint .kplabel{
+  display:inline-flex;align-items:center;height:21px;padding:0 8px;
+  border-radius:6px;background:var(--kp-bg);color:var(--kp);
+  font:500 11px/1 Roboto,"Noto Sans KR",sans-serif;letter-spacing:.02em;
+  margin-bottom:6px;
+}
+.keypoint .h{font:500 15px/1.4 Roboto,"Noto Sans KR",sans-serif;margin:0 0 4px}
+.keypoint .d{font-size:13px;color:var(--on-surface-variant);margin:0;line-height:1.68}
+
+.kp-definition{--kp:var(--kp-definition);--kp-bg:var(--kp-definition-bg)}
+.kp-mechanism {--kp:var(--kp-mechanism); --kp-bg:var(--kp-mechanism-bg)}
+.kp-cause     {--kp:var(--kp-cause);     --kp-bg:var(--kp-cause-bg)}
+.kp-example   {--kp:var(--kp-example);   --kp-bg:var(--kp-example-bg)}
+.kp-comparison{--kp:var(--kp-comparison);--kp-bg:var(--kp-comparison-bg)}
+.kp-caution   {--kp:var(--kp-caution);   --kp-bg:var(--kp-caution-bg)}
+
+.kplegend{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
+
+.sect-label{
+  font:500 11px/1 Roboto,sans-serif;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--on-surface-variant);margin:22px 0 10px;
+}
+.term{display:flex;gap:10px;padding:9px 0;font-size:13px;align-items:baseline}
+.term b{color:var(--primary);font-weight:500;flex:none;min-width:58px}
+.term span{color:var(--on-surface-variant);line-height:1.6}
+
+.opt{
+  display:flex;gap:12px;align-items:flex-start;padding:13px 14px;
+  border:1px solid var(--outline-variant);border-radius:12px;margin-bottom:9px;
+  cursor:pointer;font-size:13.5px;line-height:1.55;transition:background .15s,border-color .15s;
+}
+.opt:hover{background:var(--surface-container-low)}
+.opt .radio{
+  width:19px;height:19px;border-radius:50%;border:2px solid var(--on-surface-variant);
+  flex:none;margin-top:1px;display:grid;place-items:center;
+}
+.opt.sel{border-color:var(--primary);background:var(--primary-container)}
+.opt.sel .radio{border-color:var(--primary)}
+.opt.sel .radio::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--primary)}
+.opt.right{border-color:var(--primary);background:var(--primary-container)}
+.opt.wrong{border-color:var(--error);background:var(--error-container)}
+
+.score{
+  text-align:center;padding:22px 0 18px;
+}
+.score .big{
+  font:400 40px/1 Roboto,sans-serif;color:var(--primary);
+  font-variant-numeric:tabular-nums;
+}
+.score .cap{font-size:13px;color:var(--on-surface-variant);margin-top:6px}
+
+.qcard{
+  background:var(--surface-container-low);border-radius:12px;padding:14px 16px;margin-bottom:12px;
+}
+.qcard .q{font:500 14px/1.5 Roboto,"Noto Sans KR",sans-serif;margin:0 0 10px}
+.qcard .exp{
+  font-size:12.5px;color:var(--on-surface-variant);line-height:1.65;
+  margin:10px 0 0;padding-top:10px;border-top:1px solid var(--outline-variant);
+}
+
+.snack{
+  position:absolute;left:16px;right:16px;bottom:88px;z-index:5;
+  background:var(--inverse-surface);color:var(--inverse-on-surface);
+  border-radius:8px;padding:13px 16px;font-size:13px;box-shadow:var(--elev3);
+  display:flex;gap:12px;align-items:center;
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .2s;
+}
+.snack.show{opacity:1;transform:translateY(0)}
+
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.thumb{
+  aspect-ratio:3/4;border-radius:10px;background:var(--surface-container-high);
+  position:relative;display:grid;place-items:center;overflow:hidden;
+}
+.thumb .pg{
+  position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;
+  background:var(--primary);color:var(--on-primary);
+  font:500 11px/20px Roboto,sans-serif;text-align:center;
+}
+.thumb .x{
+  position:absolute;top:5px;right:5px;width:21px;height:21px;border-radius:50%;
+  background:var(--scrim);color:#fff;display:grid;place-items:center;
+}
+.thumb .x .msym{font-size:14px}
+.thumb .lines{width:64%;display:flex;flex-direction:column;gap:4px}
+.thumb .lines i{height:3px;border-radius:2px;background:var(--outline-variant);display:block}
+.thumb.add{border:1px dashed var(--outline);background:transparent;color:var(--primary)}
+
+.counter{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;color:var(--on-surface-variant);margin-bottom:14px;
+}
+.counter b{color:var(--on-surface);font-variant-numeric:tabular-nums}
+
+.center-col{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;text-align:center;padding:24px;
+}
+.center-col .msg{font:500 16px/1.5 Roboto,"Noto Sans KR",sans-serif;margin:0}
+.center-col .sub{font-size:13px;color:var(--on-surface-variant);margin:0}
+
+/* ============ side notes ============ */
+.notes{min-width:0}
+.notes h3{
+  font-family:Roboto,"Noto Sans KR",sans-serif;font-weight:500;font-size:18px;
+  margin:0 0 4px;
+}
+.notes .sid{
+  font:500 11px/1 Roboto,sans-serif;letter-spacing:.08em;color:var(--primary);
+  text-transform:uppercase;margin:0 0 8px;
+}
+.notes p{font-size:13.5px;color:var(--on-surface-variant);margin:0 0 14px;max-width:56ch;line-height:1.7}
+.notes ul{margin:0 0 16px;padding-left:18px;font-size:13px;color:var(--on-surface-variant);line-height:1.8}
+.notes li::marker{color:var(--outline)}
+.notes .tag{
+  display:inline-block;font:500 11px/1 Roboto,sans-serif;letter-spacing:.05em;
+  background:var(--surface-container-high);color:var(--on-surface-variant);
+  padding:5px 9px;border-radius:6px;margin:0 6px 6px 0;
+}
+.notes .m3{
+  border-left:2px solid var(--primary);padding:10px 0 10px 14px;margin:0 0 16px;
+  font-size:12.5px;color:var(--on-surface-variant);line-height:1.7;
+}
+.notes .m3 b{color:var(--on-surface)}
+
+.bookcard{
+  background:var(--surface-container-low);border-radius:12px;padding:15px 16px;
+  margin-bottom:10px;cursor:pointer;transition:background .15s;
+  display:flex;gap:13px;align-items:center;
+}
+.bookcard:hover{background:var(--surface-container)}
+.bookcard .spine{
+  width:38px;height:50px;border-radius:4px;flex:none;
+  background:var(--primary-container);position:relative;overflow:hidden;
+}
+.bookcard .spine::after{
+  content:"";position:absolute;left:5px;top:0;bottom:0;width:2px;
+  background:var(--primary);opacity:.45;
+}
+.bookcard .info{flex:1;min-width:0}
+.bookcard .bt{font:500 16px/1.35 Roboto,"Noto Sans KR",sans-serif;margin:0 0 3px}
+.bookcard .bs{font-size:12px;color:var(--on-surface-variant);margin:0}
+
+.filterbox{
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+  border:1px solid var(--outline);border-radius:10px;padding:11px 14px;
+  color:var(--on-surface-variant);font-size:13.5px;
+}
+.filterbox .msym{font-size:19px}
+
+.ctx{
+  display:flex;align-items:center;gap:6px;padding:9px 14px;margin-bottom:14px;
+  background:var(--secondary-container);color:var(--on-secondary-container);
+  border-radius:10px;font:500 12px/1 Roboto,"Noto Sans KR",sans-serif;
+}
+.ctx .msym{font-size:16px}
+
+.bookhead{padding:6px 0 16px;border-bottom:1px solid var(--outline-variant);margin-bottom:14px}
+.bookhead .h{font:400 24px/1.3 Roboto,"Noto Sans KR",sans-serif;margin:0 0 6px}
+.bookhead .m{font-size:12.5px;color:var(--on-surface-variant);margin:0}
+
+.seq{
+  width:32px;height:32px;border-radius:9px;flex:none;display:grid;place-items:center;
+  background:var(--surface-container-high);color:var(--on-surface-variant);
+  font:500 12px/1 Roboto,sans-serif;
+}
+.seq.done{background:var(--primary-container);color:var(--on-primary-container)}
+
+.listitem{
+  display:flex;gap:13px;align-items:center;padding:13px 14px;border-radius:12px;
+  cursor:pointer;transition:background .15s;
+}
+.listitem:hover{background:var(--surface-container-low)}
+.listitem .msym{color:var(--primary)}
+.listitem .t{font:500 15px/1.35 Roboto,"Noto Sans KR",sans-serif;margin:0}
+.listitem .s{font-size:12px;color:var(--on-surface-variant);margin:2px 0 0}
+
+.scrim{
+  position:absolute;inset:0;background:var(--scrim);z-index:8;
+  display:none;align-items:center;justify-content:center;padding:26px;
+}
+.scrim.show{display:flex}
+.dialog{
+  background:var(--surface-container-high);border-radius:26px;padding:22px;
+  width:100%;box-shadow:var(--elev3);
+}
+.dialog h4{font:400 20px/1.3 Roboto,"Noto Sans KR",sans-serif;margin:0 0 8px}
+.dialog p{font-size:13px;color:var(--on-surface-variant);margin:0 0 18px}
+.dialog .input{
+  border:1px solid var(--outline);border-radius:8px;padding:12px 14px;
+  font-size:14px;color:var(--on-surface);position:relative;margin-bottom:20px;
+}
+.dialog .input .lbl{
+  position:absolute;top:-8px;left:10px;background:var(--surface-container-high);
+  padding:0 5px;font-size:11px;color:var(--primary);font-weight:500;
+}
+.dialog .acts{display:flex;justify-content:flex-end;gap:8px}
+.dialog .acts .btn{flex:none;padding:0 18px}
+
+footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="head">
+    <p class="kicker">클릭 프로토타입 · Material Design 3</p>
+    <h1>책 요약 앱 화면</h1>
+    <p>화면 안의 버튼을 눌러 실제 흐름대로 이동할 수 있습니다. 홈에서 시작해 촬영, 텍스트 확인, 요약, 퀴즈, 채점까지 따라가 보세요.</p>
+  </div>
+
+  <div class="screenbar" id="bar"></div>
+
+  <div class="stage">
+    <div class="device">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="right"><span class="msym" style="font-size:14px">signal_cellular_alt</span><span class="msym" style="font-size:14px">wifi</span><span class="msym" style="font-size:14px">battery_full</span></span>
+      </div>
+
+      <!-- ===== S1 홈 · 책 목록 ===== -->
+      <div class="screen on" data-s="S1">
+        <div class="appbar"><h2>내 서재</h2></div>
+        <div class="body">
+          <div class="bookcard" data-goto="S2">
+            <span class="spine"></span>
+            <span class="info"><p class="bt">운영체제 교재</p><p class="bs">3회차 · 13,270자 · 어제 학습</p></span>
+            <span class="badge ok">2 / 3</span>
+          </div>
+          <div class="bookcard" data-goto="S2">
+            <span class="spine" style="background:var(--tertiary-container)"></span>
+            <span class="info"><p class="bt">자료구조 교재</p><p class="bs">5회차 · 21,400자 · 3일 전 학습</p></span>
+            <span class="badge ok">3 / 3</span>
+          </div>
+          <div class="bookcard" data-goto="S2">
+            <span class="spine" style="background:var(--surface-container-highest)"></span>
+            <span class="info"><p class="bt">네트워크 개론</p><p class="bs">1회차 · 4,600자 · 요약 진행 중</p></span>
+            <span class="badge wait">진행 중</span>
+          </div>
+          <div style="height:80px"></div>
+        </div>
+        <button class="fab" data-goto="S3" data-book="none"><span class="msym">photo_camera</span>바로 찍기</button>
+        <div class="snack"><span></span></div>
+      </div>
+
+      <!-- ===== S2 책 상세 · 회차 목록 ===== -->
+      <div class="screen" data-s="S2">
+        <div class="appbar">
+          <button class="iconbtn" data-goto="S1"><span class="msym">arrow_back</span></button>
+          <h2>책</h2>
+          <button class="iconbtn"><span class="msym">delete</span></button>
+        </div>
+        <div class="body">
+          <div class="bookhead">
+            <p class="h">운영체제 교재</p>
+            <p class="m">3회차 · 13,270자 · 2026년 9월 14일 시작</p>
+          </div>
+
+          <div class="card" data-goto="S8">
+            <div class="row">
+              <span style="display:flex;gap:12px;align-items:center;min-width:0">
+                <span class="seq done">1</span>
+                <span style="min-width:0"><p class="t" style="font-size:15px">프로세스 관리</p><p class="s">9월 14일 · 5,240자</p></span>
+              </span>
+              <span class="badge ok">2 / 3</span>
+            </div>
+          </div>
+
+          <div class="card" data-goto="S8">
+            <div class="row">
+              <span style="display:flex;gap:12px;align-items:center;min-width:0">
+                <span class="seq done">2</span>
+                <span style="min-width:0"><p class="t" style="font-size:15px">메모리 계층 구조</p><p class="s">9월 18일 · 4,410자</p></span>
+              </span>
+              <span class="badge ok">3 / 3</span>
+            </div>
+          </div>
+
+          <div class="card" data-goto="S7" data-snack="요약을 다시 시도합니다">
+            <div class="row">
+              <span style="display:flex;gap:12px;align-items:center;min-width:0">
+                <span class="seq">3</span>
+                <span style="min-width:0"><p class="t" style="font-size:15px;color:var(--on-surface-variant)">파일 시스템은 저장 장치를…</p><p class="s">9월 20일 · 3,620자 · 탭하여 재시도</p></span>
+              </span>
+              <span class="badge err">실패</span>
+            </div>
+          </div>
+
+          <div style="height:80px"></div>
+        </div>
+        <button class="fab" data-goto="S3" data-book="set"><span class="msym">add</span>회차 추가</button>
+        <div class="snack"><span></span></div>
+      </div>
+
+      <!-- ===== S3 이미지 선택 ===== -->
+      <div class="screen" data-s="S3">
+        <div class="appbar"><button class="iconbtn" data-back><span class="msym">arrow_back</span></button><h2>사진 선택</h2></div>
+        <div class="body">
+          <div class="ctx" id="ctxChip"><span class="msym">book</span><span>운영체제 교재 · 4회차로 추가</span></div>
+          <div class="counter"><span>선택한 사진</span><span><b>3</b> / 8</span></div>
+          <div class="thumbs">
+            <div class="thumb"><span class="pg">1</span><span class="x"><span class="msym">close</span></span><span class="lines"><i></i><i></i><i style="width:70%"></i><i></i><i style="width:85%"></i></span></div>
+            <div class="thumb"><span class="pg">2</span><span class="x"><span class="msym">close</span></span><span class="lines"><i></i><i style="width:80%"></i><i></i><i></i><i style="width:60%"></i></span></div>
+            <div class="thumb"><span class="pg">3</span><span class="x"><span class="msym">close</span></span><span class="lines"><i style="width:90%"></i><i></i><i></i><i style="width:75%"></i><i></i></span></div>
+            <div class="thumb add"><span class="msym">add</span></div>
+          </div>
+          <div class="banner"><span class="msym">lightbulb</span><span>한 번에 한 페이지씩 찍으면 글자를 더 정확하게 읽어요. 길게 눌러 순서를 바꿀 수 있습니다.</span></div>
+        </div>
+        <div class="bottombar">
+          <button class="btn outlined" data-back>취소</button>
+          <button class="btn filled" data-goto="S4">텍스트 추출</button>
+        </div>
+      </div>
+
+      <!-- ===== S4 OCR ===== -->
+      <div class="screen" data-s="S4">
+        <div class="appbar"><h2>텍스트 추출 중</h2></div>
+        <div class="center-col">
+          <div class="spinner lg"></div>
+          <p class="msg">2 / 3 장 처리 중</p>
+          <p class="sub">기기에서 처리하므로 사진은<br>서버로 전송되지 않습니다</p>
+        </div>
+        <div class="bottombar"><button class="btn text" style="margin:0 auto" data-goto="S3">취소</button></div>
+      </div>
+
+      <!-- ===== S5 텍스트 확인 ===== -->
+      <div class="screen" data-s="S5">
+        <div class="appbar"><button class="iconbtn" data-goto="S3"><span class="msym">arrow_back</span></button><h2>텍스트 확인</h2></div>
+        <div class="body">
+          <div class="banner"><span class="msym">edit_note</span><span>잘못 읽힌 글자가 있으면 직접 고칠 수 있어요. 고친 내용으로 요약합니다.</span></div>
+          <div class="counter"><span>추출된 글자</span><span><b>5,240</b> / 10,000자</span></div>
+          <div class="field">
+            <span class="lbl">원문</span>
+            프로세스는 실행 중인 프로그램을 의미한다. 프로그램이 저장 장치에 담긴 정적인 코드라면, 프로세스는 메모리에 적재되어 CPU를 할당받는 동적인 실행 단위다.<br><br>
+            운영체제는 프로세스를 다섯 가지 상태로 관리한다. 생성 상태에서 시작해 준비 상태로 진입하고, 스케줄러가 CPU를 할당하면 실행 상태가 된다. 입출력 요청이 발생하면 대기 상태로 전환되며, 작업이 끝나면 종료 상태로 이동한다.<br><br>
+            각 프로세스의 상태 정보는 PCB(Process Control Block)라는 자료구조에 저장된다. PCB에는 프로세스 식별자, 프로그램 카운터, 레지스터 값, 메모리 관리 정보가 담긴다. 문맥 교환이 일어날 때 운영체제는 현재 프로세스의 PCB에 상태를 저장하고…
+          </div>
+        </div>
+        <div class="bottombar">
+          <button class="btn outlined" data-goto="S3">다시 찍기</button>
+          <button class="btn filled" id="summarizeBtn">요약하기</button>
+        </div>
+      </div>
+
+      <!-- ===== S6 책 선택 ===== -->
+      <div class="screen" data-s="S6">
+        <div class="appbar"><button class="iconbtn" data-goto="S5"><span class="msym">arrow_back</span></button><h2>어느 책인가요?</h2></div>
+        <div class="body">
+          <div class="filterbox"><span class="msym">filter_list</span><span>책 이름으로 좁히기</span></div>
+          <div class="listitem" data-newbook>
+            <span class="msym">add_circle</span>
+            <span><p class="t">새 책 만들기</p><p class="s">책 이름을 직접 입력합니다</p></span>
+          </div>
+          <p class="sect-label">기존 책</p>
+          <div class="listitem" data-goto="S7" data-snack="운영체제 교재 4회차로 저장합니다">
+            <span class="msym">book</span>
+            <span><p class="t">운영체제 교재</p><p class="s">3회차 · 어제 학습</p></span>
+          </div>
+          <div class="listitem" data-goto="S7" data-snack="자료구조 교재 6회차로 저장합니다">
+            <span class="msym">book</span>
+            <span><p class="t">자료구조 교재</p><p class="s">5회차 · 3일 전 학습</p></span>
+          </div>
+          <div class="listitem" data-goto="S7" data-snack="네트워크 개론 2회차로 저장합니다">
+            <span class="msym">book</span>
+            <span><p class="t">네트워크 개론</p><p class="s">1회차 · 오늘 추가</p></span>
+          </div>
+        </div>
+        <div class="scrim" id="newBookScrim">
+          <div class="dialog">
+            <h4>새 책 만들기</h4>
+            <p>이 내용을 담을 책의 이름을 적어주세요.</p>
+            <div class="input"><span class="lbl">책 이름</span>알고리즘 문제 해결 전략</div>
+            <div class="acts">
+              <button class="btn text" data-closedlg>취소</button>
+              <button class="btn filled" data-goto="S7" data-closedlg data-snack="알고리즘 문제 해결 전략 1회차로 저장합니다">만들기</button>
+            </div>
+          </div>
+        </div>
+        <div class="snack"><span></span></div>
+      </div>
+
+      <!-- ===== S7 요약 대기 ===== -->
+      <div class="screen" data-s="S7">
+        <div class="appbar"><h2>요약 만드는 중</h2></div>
+        <div class="center-col">
+          <div style="width:180px"><div class="progress-line"><i></i></div></div>
+          <p class="msg">핵심 내용을 정리하고 있어요</p>
+          <p class="sub">보통 10초 안에 끝나요 · 12초 경과</p>
+        </div>
+        <div class="bottombar"><button class="btn text" style="margin:0 auto" data-goto="S2" data-snack="요약은 계속 만들어집니다. 목록에서 확인하세요">취소</button></div>
+        <div class="snack"><span></span></div>
+      </div>
+
+      <!-- ===== S8 요약 보기 ===== -->
+      <div class="screen" data-s="S8">
+        <div class="appbar">
+          <button class="iconbtn" data-goto="S2"><span class="msym">arrow_back</span></button>
+          <h2>요약</h2>
+          <button class="iconbtn"><span class="msym">delete</span></button>
+        </div>
+        <div class="body">
+          <div class="ctx" data-goto="S2" style="cursor:pointer"><span class="msym">book</span><span>운영체제 교재 · 1회차</span></div>
+          <p style="font:400 24px/1.35 Roboto,'Noto Sans KR',sans-serif;margin:2px 0 18px">프로세스 관리</p>
+
+          <div class="keypoint kp-definition">
+            <span class="stripe"></span>
+            <div><span class="kplabel">정의</span>
+              <p class="h">프로세스의 정의</p>
+              <p class="d">실행 중인 프로그램. 저장 장치의 정적인 코드와 달리 메모리에 적재되어 CPU를 할당받는 동적 단위다.</p></div>
+          </div>
+          <div class="keypoint kp-mechanism">
+            <span class="stripe"></span>
+            <div><span class="kplabel">원리</span>
+              <p class="h">상태 전이 과정</p>
+              <p class="d">생성에서 시작해 준비·실행·대기를 오가며 종료로 향한다. 전이는 스케줄러가 관리한다.</p></div>
+          </div>
+          <div class="keypoint kp-cause">
+            <span class="stripe"></span>
+            <div><span class="kplabel">원인</span>
+              <p class="h">문맥 교환이 필요한 이유</p>
+              <p class="d">CPU는 하나인데 실행할 프로세스는 여럿이라 번갈아 처리해야 하며, 그 과정에서 오버헤드가 발생한다.</p></div>
+          </div>
+          <div class="keypoint kp-example">
+            <span class="stripe"></span>
+            <div><span class="kplabel">예시</span>
+              <p class="h">워드프로세서의 경우</p>
+              <p class="d">실행하면 프로세스가 생성되고, 저장 중에는 입출력을 기다리며 대기 상태가 된다.</p></div>
+          </div>
+          <div class="keypoint kp-comparison">
+            <span class="stripe"></span>
+            <div><span class="kplabel">비교</span>
+              <p class="h">프로세스와 스레드</p>
+              <p class="d">프로세스는 독립된 메모리를 갖고, 스레드는 같은 프로세스 안에서 메모리를 공유한다.</p></div>
+          </div>
+          <div class="keypoint kp-caution">
+            <span class="stripe"></span>
+            <div><span class="kplabel">주의</span>
+              <p class="h">준비와 대기는 다르다</p>
+              <p class="d">준비는 CPU 할당을 기다리는 상태, 대기는 입출력 완료를 기다리는 상태다. 혼동하기 쉽다.</p></div>
+          </div>
+
+          <p class="sect-label">외워야 할 용어</p>
+          <div class="term"><b>PCB</b><span>프로세스 제어 블록. 상태 정보를 담는 자료구조</span></div>
+          <div class="term"><b>문맥 교환</b><span>실행 프로세스를 교체하며 PCB에 상태를 저장·복원하는 과정</span></div>
+          <div class="term"><b>스케줄러</b><span>준비 상태의 프로세스에 CPU를 배분하는 모듈</span></div>
+
+          <div class="card outlined" style="margin-top:20px">
+            <div class="row"><p class="t" style="font-size:14px">원문 보기</p><span class="msym" style="font-size:20px;color:var(--on-surface-variant)">expand_more</span></div>
+          </div>
+          <div style="height:12px"></div>
+        </div>
+        <div class="bottombar">
+          <button class="btn filled" id="quizBtn" data-quiz>퀴즈 풀기</button>
+        </div>
+        <div class="snack"><span></span></div>
+      </div>
+
+      <!-- ===== S9 퀴즈 ===== -->
+      <div class="screen" data-s="S9">
+        <div class="appbar"><button class="iconbtn" data-goto="S8"><span class="msym">close</span></button><h2>퀴즈</h2><span style="font:500 13px Roboto,sans-serif;color:var(--on-surface-variant);padding-right:14px">1 / 3</span></div>
+        <div class="body">
+          <div class="progress-line" style="margin:2px 0 20px"><i style="animation:none;left:0;width:33%"></i></div>
+          <p style="font:500 17px/1.5 Roboto,'Noto Sans KR',sans-serif;margin:0 0 20px">프로세스의 준비 상태에 대한 설명으로 옳은 것은?</p>
+          <div class="opt" data-pick><span class="radio"></span><span>CPU를 할당받아 명령을 수행하고 있는 상태</span></div>
+          <div class="opt" data-pick><span class="radio"></span><span>실행에 필요한 자원을 모두 확보하고 CPU 할당만 기다리는 상태</span></div>
+          <div class="opt" data-pick><span class="radio"></span><span>입출력 작업의 완료를 기다리는 상태</span></div>
+          <div class="opt" data-pick><span class="radio"></span><span>자원을 반납하고 실행을 마친 상태</span></div>
+        </div>
+        <div class="bottombar"><button class="btn filled" id="nextBtn" data-goto="S10" disabled>다음</button></div>
+      </div>
+
+      <!-- ===== S10 채점 ===== -->
+      <div class="screen" data-s="S10">
+        <div class="appbar"><button class="iconbtn" data-goto="S8"><span class="msym">arrow_back</span></button><h2>채점 결과</h2></div>
+        <div class="body">
+          <div class="score"><div class="big">2 / 3</div><p class="cap">세 문제 중 두 문제를 맞혔어요</p></div>
+
+          <div class="qcard">
+            <p class="q">1. 프로세스의 준비 상태에 대한 설명으로 옳은 것은?</p>
+            <div class="opt right"><span class="msym" style="font-size:19px;color:var(--primary)">check_circle</span><span>실행에 필요한 자원을 모두 확보하고 CPU 할당만 기다리는 상태</span></div>
+            <p class="exp">준비 상태는 자원을 확보하고 CPU 할당만 기다리는 단계다. 입출력을 기다리는 것은 대기 상태다.</p>
+          </div>
+
+          <div class="qcard">
+            <p class="q">2. PCB에 저장되지 않는 정보는?</p>
+            <div class="opt wrong"><span class="msym" style="font-size:19px;color:var(--error)">cancel</span><span>프로그램 카운터 <b style="font-weight:500">— 내가 고른 답</b></span></div>
+            <div class="opt right"><span class="msym" style="font-size:19px;color:var(--primary)">check_circle</span><span>사용자 로그인 기록</span></div>
+            <p class="exp">PCB는 프로세스 식별자, 프로그램 카운터, 레지스터 값, 메모리 관리 정보를 담는다. 로그인 기록은 프로세스 제어와 무관하다.</p>
+          </div>
+          <div style="height:8px"></div>
+        </div>
+        <div class="bottombar">
+          <button class="btn outlined" data-goto="S9">다시 풀기</button>
+          <button class="btn filled" data-goto="S8">요약으로</button>
+        </div>
+      </div>
+
+    </div><!-- /device -->
+
+    <div class="notes" id="notes"></div>
+  </div>
+
+  <footer>Material Design 3 · 색 역할과 타입 스케일을 적용한 클릭 프로토타입. 실제 구현 전 흐름 검증용입니다.</footer>
+</div>
+
+<script>
+(function(){
+  var SCREENS = [
+    {id:"S1", name:"홈 · 책 목록", desc:"책 단위로 묶어서 보여준다. 한 권을 여러 번 나눠 촬영하므로 평면 목록으로는 권 구분과 진도 파악이 불가능하다.",
+     points:["책 카드에 회차 수, 총 글자 수, 마지막 학습일, 최근 점수를 함께 표시","마지막 학습일 내림차순 정렬 — 최근에 본 책이 위로","검색은 1차 미도입. 1년을 써도 책 20권 내외라 목록 탐색으로 충분하다"],
+     m3:"책 카드는 <b>list item</b> 형태. 좌측 색 블록으로 권을 구분하고, 상태는 <b>badge</b>로."},
+    {id:"S2", name:"책 상세 · 회차 목록", desc:"한 권의 회차를 순서대로 보여준다. 어디까지 봤는지가 이 화면의 핵심 정보다.",
+     points:["회차 번호 오름차순 — 책은 순서대로 읽는 대상이다","실패 회차를 누르면 재촬영 없이 요약만 다시 요청","마지막 회차를 지워도 책은 유지하고 사용자가 직접 삭제"],
+     m3:"회차 번호는 <b>leading element</b>로 고정 위치. 완료 회차만 primary-container로 채워 진도를 드러낸다."},
+    {id:"S3", name:"사진 선택", desc:"촬영과 갤러리 선택, 순서 변경. 페이지 순서가 곧 텍스트 순서라 재정렬이 필요하다.",
+     points:["책이 정해진 상태면 상단에 대상 책과 회차 번호를 표시","최대 8장. 초과 선택은 스낵바 안내 후 무시","펼침면 촬영도 허용하되 한 페이지씩 찍도록 유도"],
+     m3:"대상 책은 <b>secondary-container</b> 칩으로 맥락을 고정한다. 안내는 banner."},
+    {id:"S4", name:"텍스트 추출", desc:"기기 안에서 OCR을 순차 처리한다. 사진은 서버로 전송되지 않는다.",
+     points:["장당 리사이즈 후 ML Kit 호출","누적 100자 미만이면 재촬영 안내 후 복귀","10,000자를 넘으면 절단하고 다음 화면에 배너"],
+     m3:"소요 시간을 알 수 없으므로 <b>indeterminate circular indicator</b>."},
+    {id:"S5", name:"텍스트 확인", desc:"추출 결과를 사용자가 직접 검토하고 고친다. 이 화면이 OCR 오류에 대한 안전장치다.",
+     points:["편집한 내용으로 요약을 만든다","책이 정해져 있으면 바로 요약, 아니면 책 선택 화면으로","연결이 없으면 요약하기를 누를 때만 안내"],
+     m3:"<b>outlined text field</b>에 부동 라벨. 하단은 outlined·filled 버튼 쌍으로 우선순위를 나눈다."},
+    {id:"S6", name:"책 선택", desc:"홈에서 바로 촬영한 경우에만 거친다. 책 상세에서 시작하면 이 화면을 건너뛴다.",
+     points:["새 책 만들기를 목록 맨 위에 고정","책은 첫 회차와 함께 생성된다. 빈 책을 먼저 만들지 않는다","목록이 길어지는 유일한 지점이라 이름 필터를 둔다 — 검색이 아닌 인라인 필터"],
+     m3:"<b>dialog</b>로 제목을 받는다. 28dp 라운드, 우측 정렬 액션, text·filled 버튼 조합."},
+    {id:"S7", name:"요약 생성 대기", desc:"2초 간격으로 작업 상태를 조회한다. 경과 시간을 함께 보여준다.",
+     points:["취소는 화면 이탈만 의미한다. 서버 작업은 계속되고 결과도 저장된다","60초를 넘기면 지연 안내로 문구만 바꾸고 폴링은 유지","앱을 껐다 켜도 저장된 작업 ID로 복구"],
+     m3:"진행률을 알 수 없으므로 <b>indeterminate linear indicator</b>. 취소는 text button으로 낮춘다."},
+    {id:"S8", name:"요약 보기", desc:"회차의 허브. 목록에서 들어와도, 채점을 마쳐도 이 화면으로 돌아온다.",
+     points:["상단에 책 제목과 회차를 항상 표시하고 누르면 책으로 이동","제목은 내용을 특정할 수 있게 구체적으로 생성한다 — 탐색성을 제목이 담당한다","퀴즈 버튼을 누르면 화면 전환 없이 버튼 안에서 대기한다"],
+     m3:"색은 좌측 스트라이프와 라벨 칩에만 쓰고 본문에는 적용하지 않는다. 가장 빈번한 정의 유형에 중립색을 배정해 나머지가 눈에 띄게 한다."},
+    {id:"S9", name:"퀴즈 풀이", desc:"문항을 순서대로 푼다. 정답과 해설은 제출 전까지 내려오지 않는다.",
+     points:["서버가 채점하므로 앱은 정답을 갖지 않는다","미응답 문항이 있으면 제출 시 확인","이탈하면 진행 상황 소실 경고"],
+     m3:"선택지는 <b>outlined card</b> + 라디오. 선택 시 primary-container로 채운다."},
+    {id:"S10", name:"채점 결과", desc:"점수와 문항별 정오답, 해설을 함께 보여준다.",
+     points:["오답은 고른 답과 정답을 나란히 표시","재응시해도 기존 결과를 덮어쓰지 않고 누적","다시 풀기는 같은 문항을 다시 푼다"],
+     m3:"정오답은 색만으로 구분하지 않고 <b>아이콘</b>을 함께 쓴다. 점수는 display 크기로 강조."}
+  ];
+
+  var bar = document.getElementById("bar");
+  var notes = document.getElementById("notes");
+  var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
+
+  SCREENS.forEach(function(s){
+    var b = document.createElement("button");
+    b.className = "sbtn"; b.type = "button";
+    b.textContent = s.id + "  " + s.name;
+    b.setAttribute("data-goto", s.id);
+    bar.appendChild(b);
+  });
+
+  function renderNotes(id){
+    var s = SCREENS.filter(function(x){return x.id===id})[0];
+    if(!s) return;
+    notes.innerHTML =
+      '<p class="sid">'+s.id+'</p>'+
+      '<h3>'+s.name+'</h3>'+
+      '<p>'+s.desc+'</p>'+
+      '<ul>'+s.points.map(function(p){return "<li>"+p+"</li>"}).join("")+'</ul>'+
+      '<div class="m3">'+s.m3+'</div>';
+  }
+
+  function go(id){
+    screens.forEach(function(el){ el.classList.toggle("on", el.getAttribute("data-s")===id); });
+    Array.prototype.forEach.call(bar.children, function(b){
+      b.setAttribute("aria-current", String(b.getAttribute("data-goto")===id));
+    });
+    renderNotes(id);
+    document.querySelectorAll(".snack.show").forEach(function(s){ s.classList.remove("show"); });
+    var body = document.querySelector('.screen.on .body');
+    if(body) body.scrollTop = 0;
+    if(id==="S9") resetQuiz();
+    var scrim = document.getElementById("newBookScrim");
+    if(scrim) scrim.classList.remove("show");
+  }
+
+  function snack(el, msg){
+    if(!el) return;
+    el.firstElementChild.textContent = msg;
+    el.classList.add("show");
+    setTimeout(function(){ el.classList.remove("show"); }, 2200);
+  }
+
+  var bookAssigned = true;   // 책 상세에서 시작했는지
+  var cameFrom = "S2";
+
+  document.addEventListener("click", function(e){
+    var nb = e.target.closest("[data-newbook]");
+    if(nb){ document.getElementById("newBookScrim").classList.add("show"); return; }
+    var cd = e.target.closest("[data-closedlg]");
+    if(cd){ document.getElementById("newBookScrim").classList.remove("show"); }
+    var bk = e.target.closest("[data-back]");
+    if(bk){ go(cameFrom); return; }
+    var sm = e.target.closest("#summarizeBtn");
+    if(sm){ go(bookAssigned ? "S7" : "S6"); return; }
+
+    var t = e.target.closest("[data-goto]");
+    if(t && !t.disabled){
+      var msg = t.getAttribute("data-snack");
+      var mode = t.getAttribute("data-book");
+      if(mode){
+        bookAssigned = (mode === "set");
+        cameFrom = bookAssigned ? "S2" : "S1";
+        var chip = document.getElementById("ctxChip");
+        if(chip) chip.style.display = bookAssigned ? "" : "none";
+      }
+      go(t.getAttribute("data-goto"));
+      if(msg){ snack(document.querySelector(".screen.on .snack"), msg); }
+      return;
+    }
+    var pick = e.target.closest("[data-pick]");
+    if(pick){
+      pick.parentElement.querySelectorAll("[data-pick]").forEach(function(o){ o.classList.remove("sel"); });
+      pick.classList.add("sel");
+      document.getElementById("nextBtn").disabled = false;
+      return;
+    }
+    var q = e.target.closest("[data-quiz]");
+    if(q && !q.disabled){
+      // 버튼 내 대기 — 결정된 UX를 그대로 보여준다
+      q.disabled = true;
+      q.innerHTML = '<span class="spinner"></span>문제를 만드는 중';
+      setTimeout(function(){
+        q.disabled = false;
+        q.textContent = "퀴즈 풀기";
+        go("S9");
+      }, 1400);
+    }
+  });
+
+  function resetQuiz(){
+    document.querySelectorAll("#nextBtn").forEach(function(b){ b.disabled = true; });
+    document.querySelectorAll("[data-pick]").forEach(function(o){ o.classList.remove("sel"); });
+  }
+
+  go("S1");
+})();
+</script>
+</body>
+</html>
