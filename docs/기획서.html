@@ -449,6 +449,7 @@ LLM 요약 생성 (비동기)         작업 ID + 2초 폴링
           <tr><td class="k">저장 대상</td><td>문서 텍스트 · 요약 · 퀴즈 · 풀이 결과</td><td><span class="chip fix">확정</span></td></tr>
           <tr><td class="k">이미지 저장</td><td>하지 않음. 서버로 전송하지 않음</td><td><span class="chip fix">확정</span></td></tr>
           <tr><td class="k">인증</td><td>Firebase Auth 익명 로그인</td><td><span class="chip fix">확정</span></td></tr>
+          <tr><td class="k">비활성 사용자 정리</td><td>마지막 요청 후 90일이 지나면 해당 사용자의 데이터 전체 삭제. 계정 연결은 2차</td><td><span class="chip fix">확정</span></td></tr>
           <tr><td class="k">앱 아키텍처</td><td>기능별 3계층 (presentation / domain / data). UseCase 미도입</td><td><span class="chip fix">확정</span></td></tr>
           <tr><td class="k">상태 관리</td><td>Riverpod</td><td><span class="chip fix">확정</span></td></tr>
           <tr><td class="k">서버 아키텍처</td><td>레이어드 + LLM 포트·어댑터 분리</td><td><span class="chip fix">확정</span></td></tr>
@@ -711,7 +712,8 @@ LLM 요약 생성 (비동기)         작업 ID + 2초 폴링
     <h2><span class="num">05</span>데이터 모델</h2>
     <p class="sub">이미지 테이블은 존재하지 않는다. 소유자 식별은 <code>Book.userId</code>로 하고 회차는 책을 통해 귀속된다.</p>
 
-<pre>Book        id, userId, title, createdAt
+<pre>User        id(uid), createdAt, lastSeenAt
+Book        id, userId, title, createdAt
 Document    id, bookId, sequence, extractedText, charCount, status, createdAt
 Summary     id, documentId, contentJson
 Quiz        id, documentId, questionsJson, createdAt
@@ -721,6 +723,7 @@ QuizResult  id, quizId, answersJson, score, solvedAt</pre>
       <table>
         <thead><tr><th>필드</th><th>설명</th></tr></thead>
         <tbody>
+          <tr><td class="k mono">User.lastSeenAt</td><td>첫 인증 요청 시 <code>User</code> 생성. 익명 로그인은 재설치 시 uid가 바뀌어 이전 데이터에 접근할 수 없으므로, 90일 비활성 사용자의 책·회차·요약·퀴즈·풀이 결과를 일괄 삭제</td></tr>
           <tr><td class="k mono">Book.title</td><td>사용자가 입력. 책 이름은 사용자가 가장 정확히 알고 있으며 입력은 권당 한 번뿐이다</td></tr>
           <tr><td class="k mono">Document.sequence</td><td>책 안에서의 등록 순서. 화면에는 <code>3회차</code>처럼 표기</td></tr>
           <tr><td class="k mono">Document.status</td><td><code>PROCESSING · DONE · FAILED</code>. 실패한 회차도 목록에 남겨 재시도 경로를 제공</td></tr>
@@ -741,7 +744,7 @@ QuizResult  id, quizId, answersJson, score, solvedAt</pre>
   <!-- 6 -->
   <section id="api">
     <h2><span class="num">06</span>API 명세</h2>
-    <p class="sub">Base <code>/api/v1</code> · 인증 <code>Authorization: Bearer {Firebase ID Token}</code> · 시각 ISO-8601 UTC. 서버는 Firebase Admin SDK로 토큰을 검증하고 <code>uid</code>를 사용자 식별자로 사용한다.</p>
+    <p class="sub">Base <code>/api/v1</code> · 인증 <code>Authorization: Bearer {Firebase ID Token}</code> · 시각 ISO-8601 UTC. 서버는 Firebase Admin SDK로 토큰을 검증하고 <code>uid</code>를 사용자 식별자로 사용한다. 첫 요청 시 <code>User</code>를 생성하고 <code>lastSeenAt</code>은 하루 한 번만 갱신한다.</p>
 
     <div class="tw">
       <table>
@@ -1266,6 +1269,7 @@ BookSummaryApi/          Kotlin + Spring Boot
           <tr><td class="k">책 제목 수정 · 병합</td><td>수정 엔드포인트 포함</td></tr>
           <tr><td class="k">회차 순서 변경</td><td>허용 여부</td></tr>
           <tr><td class="k">푸시 알림</td><td>도입 시점</td></tr>
+          <tr><td class="k">계정 연결</td><td>Google 로그인 도입 시점. 익명 uid를 유지한 채 연결해 재설치 후 복구</td></tr>
           <tr><td class="k">펼침면 좌우 보정</td><td>블록 좌표 기반 재정렬</td></tr>
         </tbody>
       </table>
