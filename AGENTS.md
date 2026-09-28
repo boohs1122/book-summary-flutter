@@ -10,6 +10,7 @@
 - [.ai/rules/architecture.md](.ai/rules/architecture.md) — 레이어 구조와 의존 방향
 - [.ai/rules/coding.md](.ai/rules/coding.md) — 코드 스타일, 상태 관리
 - [.ai/rules/git.md](.ai/rules/git.md) — 브랜치, 커밋 메시지
+- [.ai/rules/pr.md](.ai/rules/pr.md) — PR 작성과 병합
 - [.ai/rules/testing.md](.ai/rules/testing.md) — 테스트 대상과 작성 기준
 - [.ai/rules/docs.md](.ai/rules/docs.md) — 문서 작성 규칙
 
