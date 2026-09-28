@@ -44,3 +44,10 @@ app.*.map.json
 
 # Claude Code 개인 설정
 .claude/settings.local.json
+
+# Firebase 설정 (flutterfire configure로 생성)
+/lib/firebase_options.dart
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+/ios/firebase_app_id_file.json
+/firebase.json
