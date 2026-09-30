@@ -1,16 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const _configuredApiBaseUrl = String.fromEnvironment('API_BASE_URL');
-
-String get apiBaseUrl => _configuredApiBaseUrl.isNotEmpty
-    ? _configuredApiBaseUrl
-    : defaultTargetPlatform == TargetPlatform.android
-    ? 'http://10.0.2.2:8080/api/v1'
-    : 'http://localhost:8080/api/v1';
+const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 
 final dioProvider = Provider<Dio>((ref) {
+  if (apiBaseUrl.isEmpty) {
+    throw StateError('API_BASE_URL is required');
+  }
+
   final dio = Dio(
     BaseOptions(
       baseUrl: apiBaseUrl,
