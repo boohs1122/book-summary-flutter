@@ -20,6 +20,8 @@
 
 - [commit](.agents/skills/commit/SKILL.md) — 커밋 절차
 - [pr](.agents/skills/pr/SKILL.md) — PR 생성과 병합 절차
+- [design-review](.agents/skills/design-review/SKILL.md) — 앱 화면 디자인 검토·구현·검증
+- [imagegen-frontend-mobile](.agents/skills/imagegen-frontend-mobile/SKILL.md) — 모바일 화면 시안 생성
 
 ## 맥락
 
