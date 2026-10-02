@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/auth/auth_provider.dart';
 import '../../../../core/error/app_error.dart';
 import '../provider/books_provider.dart';
 
@@ -15,7 +16,7 @@ class BookListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final books = ref.watch(booksProvider);
     ref.listen(booksProvider, (previous, next) {
-      if (next.hasError) {
+      if (next.hasError && !next.isLoading) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(AppError.message(next.error!))));
@@ -28,7 +29,10 @@ class BookListScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(
           child: TextButton(
-            onPressed: () => ref.invalidate(booksProvider),
+            onPressed: () {
+              ref.invalidate(authenticatedUserProvider);
+              ref.invalidate(booksProvider);
+            },
             child: const Text(_retryLabel),
           ),
         ),
