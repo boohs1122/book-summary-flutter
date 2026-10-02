@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 
 import '../domain/library_repository.dart';
 import '../domain/model/book.dart';
+import '../domain/model/book_detail.dart';
+import 'dto/book_detail_dto.dart';
 import 'dto/book_list_dto.dart';
 
 class LibraryRepositoryImpl implements LibraryRepository {
@@ -27,5 +29,35 @@ class LibraryRepositoryImpl implements LibraryRepository {
             : BookScore(correct: score.correct, total: score.total),
       );
     }).toList();
+  }
+
+  @override
+  Future<BookDetail> getBook(String bookId) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/books/${Uri.encodeComponent(bookId)}',
+    );
+    final dto = BookDetailDto.fromJson(response.data!);
+    return BookDetail(
+      id: dto.bookId,
+      title: dto.title,
+      documentCount: dto.documentCount,
+      totalCharCount: dto.totalCharCount,
+      documents: dto.documents.map((document) {
+        final score = document.latestScore;
+        return BookDocument(
+          id: document.documentId,
+          sequence: document.sequence,
+          status: document.status,
+          title: document.title,
+          preview: document.preview,
+          charCount: document.charCount,
+          hasQuiz: document.hasQuiz,
+          createdAt: document.createdAt,
+          latestScore: score == null
+              ? null
+              : BookScore(correct: score.correct, total: score.total),
+        );
+      }).toList(),
+    );
   }
 }
