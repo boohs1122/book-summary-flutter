@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>책 페이지를 촬영해 텍스트를 추출합니다.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>책 페이지 사진을 선택해 텍스트를 추출합니다.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
