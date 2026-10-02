@@ -8,6 +8,10 @@ final booksProvider = FutureProvider<List<Book>>((ref) {
   return ref.watch(libraryRepositoryProvider).getBooks();
 });
 
+final deleteBookProvider = FutureProvider.family<void, String>((ref, bookId) {
+  return ref.read(libraryRepositoryProvider).deleteBook(bookId);
+});
+
 final bookDetailProvider = FutureProvider.family<BookDetail, String>((
   ref,
   bookId,

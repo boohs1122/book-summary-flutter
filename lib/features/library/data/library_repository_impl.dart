@@ -32,6 +32,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
+  Future<void> deleteBook(String bookId) async {
+    await _dio.delete<void>('/books/${Uri.encodeComponent(bookId)}');
+  }
+
+  @override
   Future<BookDetail> getBook(String bookId) async {
     final response = await _dio.get<Map<String, dynamic>>(
       '/books/${Uri.encodeComponent(bookId)}',
