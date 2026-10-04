@@ -8,4 +8,4 @@ final authenticatedUserProvider = FutureProvider<User>((ref) async {
 
   final credential = await auth.signInAnonymously();
   return credential.user ?? (throw StateError('Anonymous sign-in failed'));
-});
+}, retry: (count, error) => null);

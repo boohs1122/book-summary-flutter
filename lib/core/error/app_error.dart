@@ -7,9 +7,11 @@ abstract final class AppError {
   static const _genericMessage = '요청을 처리하지 못했습니다. 다시 시도해 주세요.';
 
   static String message(Object error) {
-    if (error is FirebaseAuthException) return _loginMessage;
+    if (error is FirebaseAuthException) return _authMessage(error);
     if (error is DioException) {
-      if (error.error is FirebaseAuthException) return _loginMessage;
+      if (error.error is FirebaseAuthException) {
+        return _authMessage(error.error! as FirebaseAuthException);
+      }
       if (_errorCode(error) == 'UNAUTHORIZED') return _loginMessage;
       if (error.type == DioExceptionType.connectionError ||
           error.type == DioExceptionType.connectionTimeout ||
@@ -19,6 +21,14 @@ abstract final class AppError {
     }
     return _genericMessage;
   }
+
+  static String _authMessage(FirebaseAuthException error) =>
+      switch (error.code) {
+        'network-request-failed' => _networkMessage,
+        'operation-not-allowed' => 'Firebase에서 익명 로그인을 사용할 수 없습니다.',
+        'too-many-requests' => '로그인 요청이 많습니다. 잠시 후 다시 시도해 주세요.',
+        _ => _loginMessage,
+      };
 
   static String? _errorCode(DioException error) {
     final data = error.response?.data;
