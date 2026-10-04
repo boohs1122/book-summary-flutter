@@ -276,7 +276,8 @@ POST /documents
 | `bookId` | string | 필수. 소유한 책의 식별자 |
 | `text` | string | 100자 이상 10,000자 이하 |
 
-`sequence`는 서버가 해당 책의 기존 회차 수 + 1로 부여한다.
+`sequence`는 서버가 해당 책에 남아 있는 회차의 최대 순번 + 1로 부여한다.
+회차가 없으면 1부터 시작하며, 삭제 후에도 남아 있는 회차의 순번은 유지한다.
 새 책에 첫 회차를 넣는 경우 클라이언트가 B2로 책을 먼저 만들고 그
 `bookId`를 전달한다.
 
@@ -333,6 +334,9 @@ GET /jobs/{jobId}
   "jobId": "job_01HX...",
   "type": "SUMMARY",
   "status": "FAILED",
+  "documentId": "doc_01HX...",
+  "createdAt": "2026-09-20T09:12:33Z",
+  "completedAt": "2026-09-20T09:12:45Z",
   "error": { "code": "LLM_FAILED", "message": "요약 생성에 실패했습니다." }
 }
 ```
@@ -341,6 +345,9 @@ GET /jobs/{jobId}
 |---|---|
 | `type` | `SUMMARY` \| `QUIZ` |
 | `status` | `PROCESSING` \| `DONE` \| `FAILED` |
+
+`DONE`과 `FAILED` 응답에는 `documentId`와 `completedAt`을 포함한다.
+요약 실패 시 반환된 `documentId`로 E9를 호출해 보관된 원문으로 재시도한다.
 
 `type`이 `QUIZ`인 경우 완료 응답에 `documentId`와 함께 `quizId`를 포함한다.
 

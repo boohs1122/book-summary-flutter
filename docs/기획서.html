@@ -869,7 +869,7 @@ QuizResult  id, quizId, answersJson, score, solvedAt</pre>
           </div>
         </div>
         <p><code>bookId</code>는 필수, <code>text</code>는 100자 이상 10,000자 이하.
-        <code>sequence</code>는 서버가 해당 책의 기존 회차 수 + 1로 부여한다. 새 책에 첫 회차를
+        <code>sequence</code>는 서버가 해당 책에 남아 있는 회차의 최대 순번 + 1로 부여한다. 회차가 없으면 1부터 시작하며, 삭제 후에도 남아 있는 회차의 순번은 유지한다. 새 책에 첫 회차를
         넣는 경우 클라이언트가 B2로 책을 먼저 만들고 그 <code>bookId</code>를 전달한다.</p>
       </div>
     </div>
@@ -894,6 +894,9 @@ QuizResult  id, quizId, answersJson, score, solvedAt</pre>
   "jobId": "job_01HX...",
   "type": "SUMMARY",
   "status": "FAILED",
+  "documentId": "doc_01HX...",
+  "createdAt": "2026-09-20T09:12:33Z",
+  "completedAt": "2026-09-20T09:12:45Z",
   "error": {
     "code": "LLM_FAILED",
     "message": "요약 생성에 실패했습니다."
@@ -903,7 +906,7 @@ QuizResult  id, quizId, answersJson, score, solvedAt</pre>
         </div>
         <p><code>type</code>은 <code>SUMMARY</code> 또는 <code>QUIZ</code>,
         <code>status</code>는 <code>PROCESSING · DONE · FAILED</code>. <code>QUIZ</code> 완료 응답에는
-        <code>quizId</code>를 함께 포함한다. 작업 레코드는 완료 후 24시간 보관한다.</p>
+        <code>quizId</code>를 함께 포함한다. 완료·실패 응답에는 <code>documentId</code>와 <code>completedAt</code>을 포함하며, 요약 실패 시 <code>documentId</code>로 E9 재시도를 요청한다. 작업 레코드는 완료 후 24시간 보관한다.</p>
       </div>
     </div>
 
