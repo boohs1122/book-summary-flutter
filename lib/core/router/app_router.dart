@@ -8,6 +8,9 @@ import '../../features/capture/presentation/screen/text_review_screen.dart';
 import '../../features/capture/presentation/screen/book_selection_screen.dart';
 import '../../features/summary/presentation/screen/summary_progress_screen.dart';
 import '../../features/summary/presentation/screen/summary_screen.dart';
+import '../../features/quiz/presentation/screen/quiz_play_screen.dart';
+import '../../features/quiz/presentation/screen/quiz_result_screen.dart';
+import '../../features/quiz/domain/model/quiz.dart';
 
 abstract final class AppRoutes {
   static const home = '/';
@@ -17,6 +20,8 @@ abstract final class AppRoutes {
   static const bookSelection = '/capture/books';
   static const summaryProgress = '/summary/progress';
   static const summary = '/summary';
+  static const quiz = '/quiz';
+  static const quizResult = '/quiz/result';
 
   static String ocrForBook(String? bookId) => Uri(
     path: ocr,
@@ -48,6 +53,14 @@ abstract final class AppRoutes {
 
   static String summaryForDocument(String documentId) => Uri(
     path: summary,
+    queryParameters: {'documentId': documentId},
+  ).toString();
+
+  static String quizForDocument(String documentId) =>
+      Uri(path: quiz, queryParameters: {'documentId': documentId}).toString();
+
+  static String quizResultForDocument(String documentId) => Uri(
+    path: quizResult,
     queryParameters: {'documentId': documentId},
   ).toString();
 }
@@ -82,6 +95,22 @@ final appRouter = GoRouter(
       path: AppRoutes.summary,
       builder: (context, state) =>
           SummaryScreen(documentId: state.uri.queryParameters['documentId']!),
+    ),
+    GoRoute(
+      path: AppRoutes.quiz,
+      builder: (context, state) => QuizPlayScreen(
+        documentId: state.uri.queryParameters['documentId']!,
+        initialQuiz: state.extra is Quiz ? state.extra! as Quiz : null,
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.quizResult,
+      builder: (context, state) => QuizResultScreen(
+        documentId: state.uri.queryParameters['documentId']!,
+        args: state.extra is QuizResultRouteArgs
+            ? state.extra! as QuizResultRouteArgs
+            : null,
+      ),
     ),
     GoRoute(
       path: AppRoutes.home,

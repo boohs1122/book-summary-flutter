@@ -7,6 +7,7 @@ import '../../../../core/router/app_router.dart';
 import '../../domain/model/book_detail.dart';
 import '../../../summary/presentation/provider/summary_submission_provider.dart';
 import '../provider/books_provider.dart';
+import '../widget/book_title_action.dart';
 
 const _retryLabel = '다시 불러오기';
 const _emptyMessage = '아직 등록된 회차가 없습니다.';
@@ -34,7 +35,13 @@ class BookDetailScreen extends ConsumerWidget {
       }
     });
     return Scaffold(
-      appBar: AppBar(title: Text(detail.value?.title ?? '')),
+      appBar: AppBar(
+        title: Text(detail.value?.title ?? ''),
+        actions: [
+          if (detail.hasValue)
+            BookTitleAction(bookId: bookId, title: detail.value!.title),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AppRoutes.captureForBook(bookId)),
         icon: const Icon(Icons.add_a_photo_outlined),
