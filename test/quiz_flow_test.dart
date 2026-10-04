@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:booksummary/core/di/repository_providers.dart';
 import 'package:booksummary/core/router/app_router.dart';
 import 'package:booksummary/features/quiz/domain/model/quiz.dart';
@@ -65,26 +67,178 @@ class _Jobs extends Fake implements SummaryRepository {
   Object? error;
   SummaryJobStatus status = SummaryJobStatus.done;
   int polls = 0;
+  Completer<SummaryJob>? response;
 
   @override
   Future<SummaryJob> getJob(String jobId) async {
     polls++;
     if (error != null) throw error!;
+    if (response != null) return response!.future;
     return SummaryJob(id: jobId, status: status, errorCode: 'LLM_ERROR');
   }
 }
 
 class _Store implements PendingQuizStore {
+  bool failSave = false;
   final jobs = <String, PendingQuizJob>{};
   @override
   Future<PendingQuizJob?> read(String documentId) async => jobs[documentId];
   @override
-  Future<void> put(PendingQuizJob job) async => jobs[job.documentId] = job;
+  Future<void> put(PendingQuizJob job) async {
+    if (failSave) throw Exception('storage unavailable');
+    jobs[job.documentId] = job;
+  }
+
   @override
   Future<void> remove(String documentId) async => jobs.remove(documentId);
 }
 
 void main() {
+  test('restart during pending generation resumes its persisted job', () async {
+    final quizzes = _Quizzes();
+    final jobs = _Jobs()..response = Completer<SummaryJob>();
+    final store = _Store();
+    ProviderContainer create() => ProviderContainer(
+      overrides: [
+        quizRepositoryProvider.overrideWithValue(quizzes),
+        summaryRepositoryProvider.overrideWithValue(jobs),
+        pendingQuizStoreProvider.overrideWithValue(store),
+      ],
+    );
+    final first = create();
+    await first.read(quizFlowProvider.future);
+    final pending = first.read(quizFlowProvider.notifier).start('document');
+    final stopped = expectLater(pending, throwsStateError);
+    while (jobs.polls == 0) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    first.dispose();
+    await stopped;
+    expect(store.jobs['document']?.jobId, 'job');
+    jobs.response = null;
+    final restarted = create();
+    addTearDown(restarted.dispose);
+    await restarted.read(quizFlowProvider.future);
+    expect(
+      (await restarted.read(quizFlowProvider.notifier).start('document')).id,
+      'quiz',
+    );
+    expect(quizzes.requests, 1);
+  });
+
+  test(
+    'reentry joins the active quiz generation without another POST',
+    () async {
+      final quizzes = _Quizzes();
+      final jobs = _Jobs()..response = Completer<SummaryJob>();
+      final container = ProviderContainer(
+        overrides: [
+          quizRepositoryProvider.overrideWithValue(quizzes),
+          summaryRepositoryProvider.overrideWithValue(jobs),
+          pendingQuizStoreProvider.overrideWithValue(_Store()),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(quizFlowProvider.future);
+      final flow = container.read(quizFlowProvider.notifier);
+      final first = flow.start('document');
+      final reentered = flow.start('document');
+      expect(identical(first, reentered), isTrue);
+      jobs.response!.complete(
+        const SummaryJob(id: 'job', status: SummaryJobStatus.done),
+      );
+      expect((await first).id, 'quiz');
+      expect((await reentered).id, 'quiz');
+      expect(quizzes.requests, 1);
+    },
+  );
+
+  test(
+    'storage retry saves the accepted quiz job without a duplicate POST',
+    () async {
+      final quizzes = _Quizzes();
+      final store = _Store()..failSave = true;
+      final container = ProviderContainer(
+        retry: (count, error) => null,
+        overrides: [
+          quizRepositoryProvider.overrideWithValue(quizzes),
+          summaryRepositoryProvider.overrideWithValue(_Jobs()),
+          pendingQuizStoreProvider.overrideWithValue(store),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(quizFlowProvider.future);
+      final flow = container.read(quizFlowProvider.notifier);
+      await expectLater(flow.start('document'), throwsException);
+      store.failSave = false;
+      await flow.start('document');
+      expect(quizzes.requests, 1);
+    },
+  );
+
+  test(
+    'expired quiz job is removed so retry can request the quiz again',
+    () async {
+      final quizzes = _Quizzes();
+      final jobs = _Jobs()..error = SummaryJobExpired();
+      final store = _Store();
+      await store.put(
+        const PendingQuizJob(documentId: 'document', jobId: 'expired'),
+      );
+      final container = ProviderContainer(
+        retry: (count, error) => null,
+        overrides: [
+          quizRepositoryProvider.overrideWithValue(quizzes),
+          summaryRepositoryProvider.overrideWithValue(jobs),
+          pendingQuizStoreProvider.overrideWithValue(store),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(quizFlowProvider.future);
+      final flow = container.read(quizFlowProvider.notifier);
+      await expectLater(
+        flow.start('document'),
+        throwsA(isA<SummaryJobExpired>()),
+      );
+      expect(store.jobs, isEmpty);
+      jobs.error = null;
+      await flow.start('document');
+      expect(quizzes.requests, 1);
+    },
+  );
+
+  test(
+    'fresh app container resumes a persisted job after connection failure',
+    () async {
+      final quizzes = _Quizzes();
+      final jobs = _Jobs()..error = Exception('offline');
+      final store = _Store();
+      ProviderContainer create() => ProviderContainer(
+        retry: (count, error) => null,
+        overrides: [
+          quizRepositoryProvider.overrideWithValue(quizzes),
+          summaryRepositoryProvider.overrideWithValue(jobs),
+          pendingQuizStoreProvider.overrideWithValue(store),
+        ],
+      );
+      final first = create();
+      await first.read(quizFlowProvider.future);
+      await expectLater(
+        first.read(quizFlowProvider.notifier).start('document'),
+        throwsException,
+      );
+      first.dispose();
+      jobs.error = null;
+      final second = create();
+      addTearDown(second.dispose);
+      await second.read(quizFlowProvider.future);
+      expect(
+        (await second.read(quizFlowProvider.notifier).start('document')).id,
+        'quiz',
+      );
+      expect(quizzes.requests, 1);
+    },
+  );
   test(
     'offline polling retry resumes the saved job without generating twice',
     () async {
