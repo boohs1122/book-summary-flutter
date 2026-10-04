@@ -1,13 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/repository_providers.dart';
 import '../../../summary/domain/model/summary_document.dart';
+import '../../../summary/presentation/provider/summary_job_provider.dart';
 import '../../domain/model/quiz.dart';
 import '../../domain/pending_quiz_store.dart';
-
-final quizPollIntervalProvider = Provider<Duration>(
-  (ref) => const Duration(seconds: 2),
-);
 
 final quizProvider = FutureProvider.family<Quiz, String>(
   (ref, documentId) => ref.watch(quizRepositoryProvider).getQuiz(documentId),
@@ -18,41 +17,83 @@ final quizFlowProvider = AsyncNotifierProvider<QuizFlowController, Quiz?>(
 );
 
 class QuizFlowController extends AsyncNotifier<Quiz?> {
+  final _acceptedJobs = <String, PendingQuizJob>{};
+  final _requests = <String, Future<Quiz>>{};
+
   @override
   Future<Quiz?> build() async => null;
 
-  Future<Quiz> start(String documentId) async {
+  Future<Quiz> start(String documentId) =>
+      _requests[documentId] ??= _start(documentId).whenComplete(() {
+        _requests.remove(documentId);
+      });
+
+  Future<Quiz> _start(String documentId) async {
     state = const AsyncLoading();
+    final store = ref.read(pendingQuizStoreProvider);
     try {
-      final store = ref.read(pendingQuizStoreProvider);
       final repository = ref.read(quizRepositoryProvider);
-      final pending = await store.read(documentId);
-      String? jobId = pending?.jobId;
-      if (jobId == null) {
+      var pending = _acceptedJobs[documentId] ?? await store.read(documentId);
+      if (pending == null) {
         final request = await repository.requestQuiz(documentId);
-        jobId = request.jobId;
+        final jobId = request.jobId;
         if (jobId != null) {
-          await store.put(PendingQuizJob(documentId: documentId, jobId: jobId));
+          pending = PendingQuizJob(documentId: documentId, jobId: jobId);
         }
       }
-      if (jobId != null) {
-        while (true) {
-          final job = await ref.read(summaryRepositoryProvider).getJob(jobId);
-          if (job.status == SummaryJobStatus.done) break;
-          if (job.status == SummaryJobStatus.failed) {
-            await store.remove(documentId);
-            throw QuizGenerationFailed(job.errorCode);
-          }
-          await Future<void>.delayed(ref.read(quizPollIntervalProvider));
+      if (pending != null) {
+        _acceptedJobs[documentId] = pending;
+        await store.put(pending);
+        final job = await _waitForJob(pending.jobId);
+        if (job.status == SummaryJobStatus.failed) {
+          throw QuizGenerationFailed(job.errorCode);
         }
       }
       final quiz = await repository.getQuiz(documentId);
       await store.remove(documentId);
+      _acceptedJobs.remove(documentId);
       state = AsyncData(quiz);
       return quiz;
     } catch (error, stackTrace) {
+      if (!ref.mounted) rethrow;
       state = AsyncError(error, stackTrace);
+      if (error is SummaryJobExpired || error is QuizGenerationFailed) {
+        await store.remove(documentId);
+        _acceptedJobs.remove(documentId);
+      }
       rethrow;
+    }
+  }
+
+  Future<SummaryJob> _waitForJob(String jobId) async {
+    final completed = Completer<SummaryJob>();
+
+    ref.invalidate(summaryJobProvider(jobId));
+    final subscription = ref.container.listen(summaryJobProvider(jobId), (
+      _,
+      next,
+    ) {
+      if (completed.isCompleted || next.isLoading) return;
+      if (next.hasError) {
+        completed.completeError(next.error!, next.stackTrace);
+      } else {
+        final job = next.value;
+        if (job != null && job.status != SummaryJobStatus.processing) {
+          completed.complete(job);
+        }
+      }
+    }, fireImmediately: true);
+    final removeDisposeListener = ref.onDispose(() {
+      subscription.close();
+      if (!completed.isCompleted) {
+        completed.completeError(StateError('Quiz polling was disposed'));
+      }
+    });
+    try {
+      return await completed.future;
+    } finally {
+      removeDisposeListener();
+      subscription.close();
     }
   }
 }

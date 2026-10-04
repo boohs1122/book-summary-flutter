@@ -19,31 +19,7 @@ class QuizStartButton extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FilledButton.icon(
-          onPressed: loading
-              ? null
-              : () async {
-                  try {
-                    final quiz = await ref
-                        .read(quizFlowProvider.notifier)
-                        .start(documentId);
-                    if (context.mounted) {
-                      context.push(
-                        AppRoutes.quizForDocument(documentId),
-                        extra: quiz,
-                      );
-                    }
-                  } catch (error) {
-                    if (context.mounted) {
-                      final message = error is QuizGenerationFailed
-                          ? _quizError(error)
-                          : error is QuizAlreadyGenerating
-                          ? '퀴즈를 만들고 있어요. 잠시 후 다시 시도해 주세요.'
-                          : AppError.message(error);
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text(message)));
-                    }
-                  }
-                },
+          onPressed: loading ? null : () => _start(context, ref),
           icon: loading
               ? const SizedBox.square(
                   dimension: 18,
@@ -56,12 +32,26 @@ class QuizStartButton extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(_errorMessage(flow.error!), textAlign: TextAlign.center),
           TextButton(
-            onPressed: () => ref.invalidate(quizFlowProvider),
+            onPressed: () => _start(context, ref),
             child: const Text('다시 시도'),
           ),
         ],
       ],
     );
+  }
+
+  Future<void> _start(BuildContext context, WidgetRef ref) async {
+    try {
+      final quiz = await ref.read(quizFlowProvider.notifier).start(documentId);
+      if (context.mounted) {
+        context.push(AppRoutes.quizForDocument(documentId), extra: quiz);
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(_errorMessage(error))));
+      }
+    }
   }
 
   String _quizError(QuizGenerationFailed error) => switch (error.code) {
