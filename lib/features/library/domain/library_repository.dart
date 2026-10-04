@@ -8,4 +8,6 @@ abstract class LibraryRepository {
   Future<BookDetail> getBook(String bookId);
 
   Future<void> deleteBook(String bookId);
+
+  Future<void> renameBook(String bookId, String title);
 }

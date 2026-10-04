@@ -11,6 +11,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _Library implements LibraryRepository {
+  @override
+  Future<void> renameBook(String bookId, String title) =>
+      throw UnimplementedError();
   int creations = 0;
   @override
   Future<String> createBook(String title) async {

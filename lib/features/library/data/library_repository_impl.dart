@@ -47,6 +47,14 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
+  Future<void> renameBook(String bookId, String title) async {
+    await _dio.patch<Map<String, dynamic>>(
+      '/books/${Uri.encodeComponent(bookId)}',
+      data: {'title': title.trim()},
+    );
+  }
+
+  @override
   Future<BookDetail> getBook(String bookId) async {
     final response = await _dio.get<Map<String, dynamic>>(
       '/books/${Uri.encodeComponent(bookId)}',

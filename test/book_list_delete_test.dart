@@ -10,6 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeLibraryRepository implements LibraryRepository {
+  @override
+  Future<void> renameBook(String bookId, String title) =>
+      throw UnimplementedError();
   bool deleted = false;
   int deleteAttempts = 0;
 
