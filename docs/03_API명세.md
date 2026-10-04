@@ -68,6 +68,7 @@ LLM 호출이 포함된 요청(요약 생성, 퀴즈 생성)은 즉시 완료되
 | B2 | POST | `/books` | 책 생성 | S6 |
 | B3 | GET | `/books/{bookId}` | 책 상세 및 회차 목록 | S2 |
 | B4 | DELETE | `/books/{bookId}` | 책 삭제 | S1 |
+| B5 | PATCH | `/books/{bookId}` | 책 제목 수정 | S1 · S2 |
 | E1 | GET | `/documents?bookId={bookId}` | 회차 목록 조회 (B3에 포함) | S2 |
 | E2 | POST | `/documents` | 텍스트 등록 및 요약 생성 요청 | S5 · S6 |
 | E3 | GET | `/jobs/{jobId}` | 작업 상태 조회 | S7 · S8 |
@@ -201,6 +202,42 @@ DELETE /books/{bookId}
 회차 수를 명시한 확인 다이얼로그를 노출한다.
 
 **에러**: `NOT_FOUND`(404), `FORBIDDEN`(403)
+
+---
+
+## B5. 책 제목 수정
+
+```
+PATCH /books/{bookId}
+Authorization: Bearer <Firebase ID 토큰>
+Content-Type: application/json
+```
+
+**요청**
+
+```json
+{ "title": "수정할 책 제목" }
+```
+
+| 필드 | 타입 | 제약 |
+|---|---|---|
+| `title` | string | 필수. 앞뒤 공백을 제거한 후 1~100자 |
+
+**응답 200**
+
+```json
+{ "bookId": "bok_01HY...", "title": "수정할 책 제목" }
+```
+
+인증된 사용자 소유의 책만 수정한다. 응답의 `title`은 앞뒤 공백이 제거된 값이다.
+책 ID·생성 시각과 연결된 문서·요약·퀴즈·풀이 결과는 유지한다.
+수정된 제목은 B1 책 목록, B3 책 상세, E4 문서 상세의 `bookTitle`에 반영된다.
+앱은 수정 성공 후 해당 조회 상태를 갱신한다.
+
+**에러**: `INVALID_REQUEST`(400 — 제목 누락·null·빈 값·공백만 있거나 공백 제거 후 100자 초과),
+`UNAUTHORIZED`(401), `FORBIDDEN`(403 — 타인 소유 책), `NOT_FOUND`(404)
+
+오류 응답은 공통 `{ "error": { "code": "...", "message": "..." } }` 형식을 따른다.
 
 ---
 
