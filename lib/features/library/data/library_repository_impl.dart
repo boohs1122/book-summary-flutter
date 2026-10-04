@@ -5,11 +5,21 @@ import '../domain/model/book.dart';
 import '../domain/model/book_detail.dart';
 import 'dto/book_detail_dto.dart';
 import 'dto/book_list_dto.dart';
+import 'dto/book_created_dto.dart';
 
 class LibraryRepositoryImpl implements LibraryRepository {
   const LibraryRepositoryImpl(this._dio);
 
   final Dio _dio;
+
+  @override
+  Future<String> createBook(String title) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/books',
+      data: {'title': title},
+    );
+    return BookCreatedDto.fromJson(response.data!).bookId;
+  }
 
   @override
   Future<List<Book>> getBooks() async {

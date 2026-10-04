@@ -14,6 +14,9 @@ class _FakeLibraryRepository implements LibraryRepository {
   int deleteAttempts = 0;
 
   @override
+  Future<String> createBook(String title) => throw UnimplementedError();
+
+  @override
   Future<List<Book>> getBooks() async => deleted
       ? []
       : [

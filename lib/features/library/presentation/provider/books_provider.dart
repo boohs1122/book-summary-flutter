@@ -6,7 +6,7 @@ import '../../domain/model/book_detail.dart';
 
 final booksProvider = FutureProvider<List<Book>>((ref) {
   return ref.watch(libraryRepositoryProvider).getBooks();
-});
+}, retry: (count, error) => null);
 
 final deleteBookProvider = FutureProvider.family<void, String>((ref, bookId) {
   return ref.read(libraryRepositoryProvider).deleteBook(bookId);
@@ -17,4 +17,4 @@ final bookDetailProvider = FutureProvider.family<BookDetail, String>((
   bookId,
 ) {
   return ref.watch(libraryRepositoryProvider).getBook(bookId);
-});
+}, retry: (count, error) => null);
