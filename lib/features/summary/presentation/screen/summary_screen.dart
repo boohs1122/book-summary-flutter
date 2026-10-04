@@ -6,6 +6,7 @@ import '../../../../core/error/app_error.dart';
 import '../../../../core/router/app_router.dart';
 import '../../domain/model/summary_document.dart';
 import '../provider/summary_job_provider.dart';
+import '../../../quiz/presentation/widget/quiz_start_button.dart';
 
 const _title = '요약 보기';
 const _original = '원문 보기';
@@ -37,16 +38,18 @@ class SummaryScreen extends ConsumerWidget {
             ],
           ),
         ),
-        data: (value) => _SummaryContent(document: value),
+        data: (value) =>
+            _SummaryContent(document: value, documentId: documentId),
       ),
     );
   }
 }
 
 class _SummaryContent extends StatelessWidget {
-  const _SummaryContent({required this.document});
+  const _SummaryContent({required this.document, required this.documentId});
 
   final SummaryDocument document;
+  final String documentId;
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +75,8 @@ class _SummaryContent extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(summary.title, style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 24),
+        QuizStartButton(documentId: documentId),
         const SizedBox(height: 24),
         Text(_keyPoints, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 8),
