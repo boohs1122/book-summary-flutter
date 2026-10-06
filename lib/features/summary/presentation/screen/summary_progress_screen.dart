@@ -7,18 +7,22 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/repository_providers.dart';
 import '../../../../core/error/app_error.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/presentation/study_widgets.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../library/presentation/widget/book_context_header.dart';
 import '../../../library/presentation/provider/books_provider.dart';
 import '../../domain/model/summary_document.dart';
 import '../provider/summary_job_provider.dart';
 import '../provider/summary_submission_provider.dart';
 
+const _reconnect = '다시 연결';
 const _title = '요약 생성';
-const _waiting = '텍스트를 바탕으로 요약을 만들고 있습니다.';
+const _waiting = '핵심 내용을 정리하고 있어요';
 const _slow = '예상보다 오래 걸리고 있습니다. 계속 기다리는 중입니다.';
 const _cancel = '나중에 보기';
 const _leaveTitle = '요약 생성은 계속됩니다';
 const _leaveMessage = '이 화면을 닫아도 서버에서 요약을 만들고 있습니다. 홈에서 진행 상황을 다시 열 수 있습니다.';
-const _leaveConfirm = '홈으로 이동';
+const _leaveConfirm = '회차 목록으로';
 const _retryLabel = '요약 다시 만들기';
 const _failed = '요약을 만들지 못했습니다.';
 const _missingDocument = '실패한 회차 정보를 찾지 못했습니다. 책 목록에서 확인해 주세요.';
@@ -101,6 +105,7 @@ class _SummaryProgressScreenState extends ConsumerState<SummaryProgressScreen>
       await ref.read(pendingJobStoreProvider).remove(widget.jobId);
       ref.invalidate(pendingSummaryJobsProvider);
       ref.invalidate(bookDetailProvider(widget.bookId));
+      ref.invalidate(booksProvider);
       if (mounted) context.go(AppRoutes.summaryForDocument(documentId));
     } catch (error) {
       _opening = false;
@@ -165,72 +170,50 @@ class _SummaryProgressScreenState extends ConsumerState<SummaryProgressScreen>
             icon: const Icon(Icons.close),
           ),
         ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: job.when(
-              loading: () => const CircularProgressIndicator(),
-              error: (error, stackTrace) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.cloud_off_outlined, size: 48),
-                  const SizedBox(height: 12),
-                  Text(AppError.message(error), textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: () {
-                      ref.invalidate(summaryJobProvider(widget.jobId));
-                    },
-                    child: const Text('다시 연결'),
-                  ),
-                ],
-              ),
-              data: (value) => switch (value.status) {
-                SummaryJobStatus.processing => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 24),
-                    Text(
-                      seconds >= 60 ? _slow : _waiting,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
-                    ),
-                  ],
-                ),
-                SummaryJobStatus.done => _DoneJob(
-                  onOpen: value.documentId == null
-                      ? null
-                      : () => _openDocument(value.documentId!),
-                ),
-                SummaryJobStatus.failed => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(_failed),
-                    if (value.errorCode != null) ...[
-                      const SizedBox(height: 4),
-                      Text(_friendlyJobError(value.errorCode!)),
-                    ],
-                    const SizedBox(height: 16),
-                    FilledButton.icon(
-                      onPressed: () => _retry(value),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text(_retryLabel),
-                    ),
-                  ],
-                ),
-              },
+        bottomNavigationBar: ActionFooter(
+          child: OutlinedButton(onPressed: _leave, child: const Text(_cancel)),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(AppSpacing.of(context).page),
+              child: BookContextHeader(bookId: widget.bookId),
             ),
-          ),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(AppSpacing.of(context).page),
+                  child: job.when(
+                    loading: () => const CircularProgressIndicator(),
+                    error: (error, stackTrace) => ScreenMessage(
+                      message: AppError.message(error),
+                      onRetry: () =>
+                          ref.invalidate(summaryJobProvider(widget.jobId)),
+                      actionLabel: _reconnect,
+                    ),
+                    data: (value) => switch (value.status) {
+                      SummaryJobStatus.processing => _ProcessingJob(
+                        seconds: seconds,
+                      ),
+                      SummaryJobStatus.done => _DoneJob(
+                        onOpen: value.documentId == null
+                            ? null
+                            : () => _openDocument(value.documentId!),
+                      ),
+                      SummaryJobStatus.failed => ScreenMessage(
+                        message: _failed,
+                        hint: value.errorCode == null
+                            ? null
+                            : _friendlyJobError(value.errorCode!),
+                        onRetry: () => _retry(value),
+                        actionLabel: _retryLabel,
+                      ),
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -259,4 +242,37 @@ class _DoneJob extends StatelessWidget {
       FilledButton(onPressed: onOpen, child: const Text('요약 보기')),
     ],
   );
+}
+
+class _ProcessingJob extends StatelessWidget {
+  const _ProcessingJob({required this.seconds});
+  final int seconds;
+  @override
+  Widget build(BuildContext context) {
+    final gap = AppSpacing.of(context);
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const CircularProgressIndicator(),
+        SizedBox(height: gap.section),
+        Text(
+          seconds >= 60 ? _slow : _waiting,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleMedium,
+        ),
+        SizedBox(height: gap.small),
+        Text(
+          '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
+          style: theme.textTheme.displaySmall?.copyWith(fontSize: 28),
+        ),
+        SizedBox(height: gap.section),
+        Text(
+          _leaveMessage,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
 }
