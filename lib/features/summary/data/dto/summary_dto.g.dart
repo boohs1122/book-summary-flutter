@@ -36,6 +36,25 @@ SummaryDocumentDto _$SummaryDocumentDtoFromJson(Map<String, dynamic> json) =>
       summary: json['summary'] == null
           ? null
           : SummaryContentDto.fromJson(json['summary'] as Map<String, dynamic>),
+      quiz: json['quiz'] == null
+          ? null
+          : SummaryQuizDto.fromJson(json['quiz'] as Map<String, dynamic>),
+    );
+
+SummaryQuizDto _$SummaryQuizDtoFromJson(Map<String, dynamic> json) =>
+    SummaryQuizDto(
+      exists: json['exists'] as bool,
+      latestScore: json['latestScore'] == null
+          ? null
+          : SummaryScoreDto.fromJson(
+              json['latestScore'] as Map<String, dynamic>,
+            ),
+    );
+
+SummaryScoreDto _$SummaryScoreDtoFromJson(Map<String, dynamic> json) =>
+    SummaryScoreDto(
+      correct: (json['correct'] as num).toInt(),
+      total: (json['total'] as num).toInt(),
     );
 
 SummaryContentDto _$SummaryContentDtoFromJson(Map<String, dynamic> json) =>

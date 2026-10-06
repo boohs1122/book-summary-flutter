@@ -61,6 +61,9 @@ class SummaryRepositoryImpl implements SummaryRepository {
       sequence: dto.sequence,
       text: dto.extractedText,
       status: _status(dto.status),
+      quizExists: dto.quiz?.exists ?? false,
+      latestCorrect: dto.quiz?.latestScore?.correct,
+      latestTotal: dto.quiz?.latestScore?.total,
       summary: summary == null
           ? null
           : SummaryContent(

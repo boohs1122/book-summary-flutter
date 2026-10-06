@@ -26,6 +26,9 @@ class SummaryDocument {
     required this.text,
     required this.status,
     this.summary,
+    this.quizExists = false,
+    this.latestCorrect,
+    this.latestTotal,
   });
   final String id;
   final String bookId;
@@ -34,6 +37,9 @@ class SummaryDocument {
   final String text;
   final SummaryJobStatus status;
   final SummaryContent? summary;
+  final bool quizExists;
+  final int? latestCorrect;
+  final int? latestTotal;
 }
 
 class SummaryContent {
