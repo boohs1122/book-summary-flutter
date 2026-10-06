@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/auth/auth_provider.dart';
+import '../../../../core/presentation/study_widgets.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/error/app_error.dart';
 import '../../../../core/router/app_router.dart';
 import '../../domain/model/book.dart';
@@ -14,7 +16,7 @@ const _screenTitle = '내 책';
 const _emptyMessage = '아직 등록된 책이 없습니다.';
 const _emptyHint = '책을 촬영해 첫 회차를 만들어 보세요.';
 const _retryLabel = '다시 불러오기';
-const _captureLabel = '바로 찍기';
+const _captureLabel = '책 사진 찍기';
 const _deleteTitle = '책을 삭제할까요?';
 const _deleteWarning = '이 책의 회차와 요약, 퀴즈가 모두 삭제됩니다.';
 const _cancelLabel = '취소';
@@ -26,20 +28,16 @@ class BookListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final books = ref.watch(booksProvider);
-    ref.listen(booksProvider, (previous, next) {
-      if (next.hasError && !next.isLoading) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppError.message(next.error!))));
-      }
-    });
+    _listenForErrors(context, ref);
 
     return Scaffold(
       appBar: AppBar(title: const Text(_screenTitle)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(AppRoutes.capture),
-        icon: const Icon(Icons.add_a_photo_outlined),
-        label: const Text(_captureLabel),
+      bottomNavigationBar: ActionFooter(
+        child: FilledButton.icon(
+          onPressed: () => context.push(AppRoutes.capture),
+          icon: const Icon(Icons.camera_alt_outlined),
+          label: const Text(_captureLabel),
+        ),
       ),
       body: Column(
         children: [
@@ -47,30 +45,24 @@ class BookListScreen extends ConsumerWidget {
           Expanded(
             child: books.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.cloud_off_outlined, size: 48),
-                    const SizedBox(height: 12),
-                    Text(AppError.message(error), textAlign: TextAlign.center),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () {
-                        ref.invalidate(authenticatedUserProvider);
-                        ref.invalidate(booksProvider);
-                      },
-                      child: const Text(_retryLabel),
-                    ),
-                  ],
-                ),
+              error: (error, stackTrace) => ScreenMessage(
+                message: AppError.message(error),
+                actionLabel: _retryLabel,
+                onRetry: () {
+                  ref.invalidate(authenticatedUserProvider);
+                  ref.invalidate(booksProvider);
+                },
               ),
               data: (items) => items.isEmpty
-                  ? _EmptyLibrary(
-                      onCapture: () => context.push(AppRoutes.capture),
+                  ? const ScreenMessage(
+                      message: _emptyMessage,
+                      hint: _emptyHint,
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.of(context).page,
+                        vertical: AppSpacing.of(context).small,
+                      ),
                       itemCount: items.length,
                       itemBuilder: (context, index) {
                         final book = items[index];
@@ -109,6 +101,16 @@ class BookListScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _listenForErrors(BuildContext context, WidgetRef ref) {
+    ref.listen(booksProvider, (previous, next) {
+      if (next.hasError && !next.isLoading) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppError.message(next.error!))));
+      }
+    });
   }
 
   Future<bool> _confirmAndDelete(
@@ -150,6 +152,7 @@ class BookListScreen extends ConsumerWidget {
 }
 
 const _pendingLabel = '요약 생성 중';
+const _pendingHint = '진행 중인 요약 확인';
 
 class _PendingJobsBanner extends ConsumerWidget {
   const _PendingJobsBanner();
@@ -163,15 +166,29 @@ class _PendingJobsBanner extends ConsumerWidget {
       data: (items) => items.isEmpty
           ? const SizedBox.shrink()
           : Card(
-              margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              margin: EdgeInsets.fromLTRB(
+                AppSpacing.of(context).page,
+                AppSpacing.of(context).item,
+                AppSpacing.of(context).page,
+                0,
+              ),
               child: Column(
                 children: [
                   for (final job in items)
                     ListTile(
                       leading: const Icon(Icons.hourglass_top),
-                      title: const Text(_pendingLabel),
+                      title: Text(
+                        ref
+                                .watch(booksProvider)
+                                .value
+                                ?.where((book) => book.id == job.bookId)
+                                .firstOrNull
+                                ?.title ??
+                            _pendingLabel,
+                      ),
+                      subtitle: const Text(_pendingHint),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.go(
+                      onTap: () => context.push(
                         AppRoutes.summaryProgressForJob(
                           job.jobId,
                           job.bookId,
@@ -182,34 +199,6 @@ class _PendingJobsBanner extends ConsumerWidget {
                 ],
               ),
             ),
-    );
-  }
-}
-
-class _EmptyLibrary extends StatelessWidget {
-  const _EmptyLibrary({required this.onCapture});
-
-  final VoidCallback onCapture;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.menu_book_outlined,
-            size: 64,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: 16),
-          Text(_emptyMessage, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Text(_emptyHint, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 16),
-          FilledButton(onPressed: onCapture, child: const Text(_captureLabel)),
-        ],
-      ),
     );
   }
 }
