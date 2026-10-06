@@ -64,3 +64,9 @@ class QuizGenerationFailed implements Exception {
 }
 
 class QuizAlreadyGenerating implements Exception {}
+
+class QuizResultRouteArgs {
+  const QuizResultRouteArgs(this.quiz, this.result);
+  final Quiz quiz;
+  final QuizResult result;
+}

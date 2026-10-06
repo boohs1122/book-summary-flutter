@@ -121,3 +121,57 @@ class QuizResultController extends AsyncNotifier<QuizResult?> {
     }
   }
 }
+
+final sessionQuizResultsProvider =
+    NotifierProvider<SessionQuizResults, Map<String, QuizResultRouteArgs>>(
+      SessionQuizResults.new,
+    );
+
+class SessionQuizResults extends Notifier<Map<String, QuizResultRouteArgs>> {
+  @override
+  Map<String, QuizResultRouteArgs> build() => {};
+  void save(Quiz quiz, QuizResult result) {
+    state = {...state, quiz.documentId: QuizResultRouteArgs(quiz, result)};
+  }
+}
+
+final lastQuizResultProvider = Provider.family<QuizResultRouteArgs?, String>(
+  (ref, documentId) => ref.watch(sessionQuizResultsProvider)[documentId],
+);
+
+class QuizSession {
+  const QuizSession({
+    required this.answers,
+    this.current = 0,
+    this.allowExit = false,
+  });
+  final List<int?> answers;
+  final int current;
+  final bool allowExit;
+}
+
+final quizSessionProvider = NotifierProvider.autoDispose
+    .family<QuizSessionController, QuizSession, Quiz>(
+      QuizSessionController.new,
+    );
+
+class QuizSessionController extends Notifier<QuizSession> {
+  QuizSessionController(this.quiz);
+  final Quiz quiz;
+  @override
+  QuizSession build() =>
+      QuizSession(answers: List<int?>.filled(quiz.questions.length, null));
+  void select(int? value) {
+    final answers = [...state.answers];
+    answers[state.current] = value;
+    state = QuizSession(answers: answers, current: state.current);
+  }
+
+  void move(int index) =>
+      state = QuizSession(answers: state.answers, current: index);
+  void allowExit() => state = QuizSession(
+    answers: state.answers,
+    current: state.current,
+    allowExit: true,
+  );
+}

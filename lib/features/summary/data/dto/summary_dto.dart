@@ -46,6 +46,7 @@ class SummaryDocumentDto {
     required this.extractedText,
     required this.status,
     this.summary,
+    this.quiz,
   });
   factory SummaryDocumentDto.fromJson(Map<String, dynamic> json) =>
       _$SummaryDocumentDtoFromJson(json);
@@ -56,6 +57,25 @@ class SummaryDocumentDto {
   final String extractedText;
   final String status;
   final SummaryContentDto? summary;
+  final SummaryQuizDto? quiz;
+}
+
+@JsonSerializable(createToJson: false)
+class SummaryQuizDto {
+  const SummaryQuizDto({required this.exists, this.latestScore});
+  factory SummaryQuizDto.fromJson(Map<String, dynamic> json) =>
+      _$SummaryQuizDtoFromJson(json);
+  final bool exists;
+  final SummaryScoreDto? latestScore;
+}
+
+@JsonSerializable(createToJson: false)
+class SummaryScoreDto {
+  const SummaryScoreDto({required this.correct, required this.total});
+  factory SummaryScoreDto.fromJson(Map<String, dynamic> json) =>
+      _$SummaryScoreDtoFromJson(json);
+  final int correct;
+  final int total;
 }
 
 @JsonSerializable(createToJson: false)
