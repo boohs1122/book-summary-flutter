@@ -3,12 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/error/app_error.dart';
+import '../../../../core/auth/auth_provider.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/presentation/study_widgets.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../library/domain/model/book.dart';
 import '../../../library/presentation/provider/books_provider.dart';
 import '../../../summary/presentation/provider/summary_submission_provider.dart';
 import '../provider/ocr_provider.dart';
 
+const _instruction = '요약을 저장할 책을 선택하세요.';
+const _noBooks = '아직 등록된 책이 없습니다.';
+const _firstSession = '새 책에 첫 회차를 저장해 보세요.';
+const _clearFilter = '필터 지우기';
 const _title = '책 선택';
 const _newBook = '새 책 만들기';
 const _filterHint = '책 이름으로 찾기';
@@ -28,7 +35,6 @@ class BookSelectionScreen extends ConsumerStatefulWidget {
 
 class _BookSelectionScreenState extends ConsumerState<BookSelectionScreen> {
   final _filterController = TextEditingController();
-  String _filter = '';
 
   @override
   void dispose() {
@@ -38,7 +44,6 @@ class _BookSelectionScreenState extends ConsumerState<BookSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final books = ref.watch(booksProvider);
     final submission = ref.watch(summarySubmissionProvider);
     ref.listen(summarySubmissionProvider, (previous, next) {
       if (next.hasError && !next.isLoading) {
@@ -47,73 +52,42 @@ class _BookSelectionScreenState extends ConsumerState<BookSelectionScreen> {
         ).showSnackBar(SnackBar(content: Text(AppError.message(next.error!))));
       }
     });
+    final gap = AppSpacing.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text(_title)),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _filterController,
-              decoration: InputDecoration(
-                hintText: _filterHint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _filter.isEmpty
-                    ? null
-                    : IconButton(
-                        onPressed: () {
-                          _filterController.clear();
-                          setState(() => _filter = '');
-                        },
-                        icon: const Icon(Icons.clear),
-                      ),
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (value) => setState(() => _filter = value.trim()),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.add_circle_outline),
-            title: const Text(_newBook),
-            trailing: submission.isLoading
-                ? const SizedBox.square(
-                    dimension: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : null,
-            onTap: submission.isLoading ? null : _createBook,
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: books.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Center(
-                child: TextButton(
-                  onPressed: () => ref.invalidate(booksProvider),
-                  child: const Text('책 목록 다시 불러오기'),
-                ),
-              ),
-              data: (items) {
-                final filtered = items
-                    .where(
-                      (book) => book.title.toLowerCase().contains(
-                        _filter.toLowerCase(),
-                      ),
+      body: Padding(
+        padding: EdgeInsets.all(gap.page),
+        child: ListView(
+          children: [
+            Text(_instruction, style: Theme.of(context).textTheme.bodySmall),
+            SizedBox(height: gap.section),
+            OutlinedButton.icon(
+              onPressed: submission.isLoading ? null : _createBook,
+              icon: submission.isLoading
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                    .toList();
-                if (filtered.isEmpty) return const Center(child: Text(_empty));
-                return ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) => _BookOption(
-                    book: filtered[index],
-                    enabled: !submission.isLoading,
-                    onTap: () => _submit(book: filtered[index]),
-                  ),
-                );
-              },
+                  : const Icon(Icons.add),
+              label: const Text(_newBook),
             ),
-          ),
-        ],
+            SizedBox(height: gap.item),
+            TextField(
+              controller: _filterController,
+              decoration: const InputDecoration(
+                hintText: _filterHint,
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+            SizedBox(height: gap.item),
+            _BookSelectionList(
+              controller: _filterController,
+              enabled: !submission.isLoading,
+              onCreate: _createBook,
+              onSelect: (book) => _submit(book: book),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -129,16 +103,25 @@ class _BookSelectionScreenState extends ConsumerState<BookSelectionScreen> {
           autofocus: true,
           maxLength: 100,
           decoration: const InputDecoration(labelText: _titlePrompt),
-          onSubmitted: (_) => Navigator.pop(dialogContext, controller.text),
+          onSubmitted: (_) {
+            if (controller.text.trim().isNotEmpty) {
+              Navigator.pop(dialogContext, controller.text);
+            }
+          },
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text(_cancel),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: const Text(_create),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (_, value, _) => FilledButton(
+              onPressed: value.text.trim().isEmpty
+                  ? null
+                  : () => Navigator.pop(dialogContext, controller.text),
+              child: const Text(_create),
+            ),
           ),
         ],
       ),
@@ -185,12 +168,84 @@ class _BookOption extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    enabled: enabled,
-    leading: const Icon(Icons.menu_book_outlined),
-    title: Text(book.title),
-    subtitle: Text('${book.documentCount}회차'),
-    trailing: const Icon(Icons.chevron_right),
-    onTap: onTap,
+  Widget build(BuildContext context) => Column(
+    children: [
+      ListTile(
+        contentPadding: EdgeInsets.symmetric(
+          vertical: AppSpacing.of(context).item,
+        ),
+        enabled: enabled,
+        leading: const Icon(Icons.menu_book_outlined),
+        title: Text(book.title, style: Theme.of(context).textTheme.titleMedium),
+        subtitle: Text('${book.documentCount}회차'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
+      ),
+      const Divider(),
+    ],
   );
+}
+
+class _BookSelectionList extends ConsumerWidget {
+  const _BookSelectionList({
+    required this.controller,
+    required this.enabled,
+    required this.onCreate,
+    required this.onSelect,
+  });
+  final TextEditingController controller;
+  final bool enabled;
+  final VoidCallback onCreate;
+  final void Function(Book book) onSelect;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final books = ref.watch(booksProvider);
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) => books.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => ScreenMessage(
+          message: AppError.message(error),
+          onRetry: () {
+            ref.invalidate(authenticatedUserProvider);
+            ref.invalidate(booksProvider);
+          },
+        ),
+        data: (items) {
+          final filtered = items
+              .where(
+                (book) => book.title.toLowerCase().contains(
+                  value.text.trim().toLowerCase(),
+                ),
+              )
+              .toList();
+          if (items.isEmpty) {
+            return ScreenMessage(
+              message: _noBooks,
+              hint: _firstSession,
+              onRetry: enabled ? onCreate : null,
+              actionLabel: _newBook,
+            );
+          }
+          if (filtered.isEmpty) {
+            return ScreenMessage(
+              message: _empty,
+              onRetry: controller.clear,
+              actionLabel: _clearFilter,
+            );
+          }
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) => _BookOption(
+              book: filtered[index],
+              enabled: enabled,
+              onTap: () => onSelect(filtered[index]),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
