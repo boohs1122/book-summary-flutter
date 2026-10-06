@@ -224,13 +224,16 @@ class PreviewOcr extends Fake implements OcrRepository {
   Future<String> recognize(String path) => response.future;
 }
 
-ProviderContainer previewContainer({PreviewLibrary? library}) {
+ProviderContainer previewContainer({
+  PreviewLibrary? library,
+  PendingJobStore? jobs,
+}) {
   final container = ProviderContainer(
     overrides: [
       libraryRepositoryProvider.overrideWithValue(library ?? PreviewLibrary()),
       summaryRepositoryProvider.overrideWithValue(PreviewSummary()),
       quizRepositoryProvider.overrideWithValue(PreviewQuizRepository()),
-      pendingJobStoreProvider.overrideWithValue(PreviewJobs()),
+      pendingJobStoreProvider.overrideWithValue(jobs ?? PreviewJobs()),
       pendingQuizStoreProvider.overrideWithValue(PreviewQuizzes()),
       ocrRepositoryProvider.overrideWithValue(PreviewOcr()),
     ],
