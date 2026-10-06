@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../../../core/presentation/study_widgets.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../library/presentation/widget/book_context_header.dart';
 import '../../domain/model/ocr_result.dart';
 import '../provider/ocr_provider.dart';
 import '../provider/selected_images_provider.dart';
@@ -15,6 +18,8 @@ const _cancel = '취소';
 const _cancelTitle = '텍스트 추출을 취소할까요?';
 const _cancelHint = '지금까지 추출한 텍스트는 삭제됩니다.';
 const _continue = '계속 추출';
+const _reading = '사진에서 글자를 읽고 있어요.';
+const _local = '사진은 기기 안에서만 처리됩니다.';
 
 class OcrProgressScreen extends ConsumerStatefulWidget {
   const OcrProgressScreen({this.bookId, super.key});
@@ -64,9 +69,7 @@ class _OcrProgressScreenState extends ConsumerState<OcrProgressScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final progress = ref.watch(ocrProvider);
+  void _listenForResult() {
     ref.listen(ocrProvider, (previous, next) {
       if (next.value?.result != null) {
         context.pushReplacement(AppRoutes.textReviewForBook(widget.bookId));
@@ -76,6 +79,12 @@ class _OcrProgressScreenState extends ConsumerState<OcrProgressScreen> {
         context.pop();
       }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = ref.watch(ocrProvider);
+    _listenForResult();
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -86,37 +95,64 @@ class _OcrProgressScreenState extends ConsumerState<OcrProgressScreen> {
           title: const Text(_title),
           automaticallyImplyLeading: false,
         ),
-        body: Center(
-          child: progress.when(
-            loading: () => const CircularProgressIndicator(),
-            error: (error, stackTrace) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(_failed),
-                TextButton(onPressed: _start, child: const Text(_retry)),
-                TextButton(
-                  onPressed: _cancelExtraction,
-                  child: const Text(_cancel),
-                ),
-              ],
-            ),
-            data: (value) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(
-                  value: value.total == 0
-                      ? null
-                      : value.processed / value.total,
-                ),
-                const SizedBox(height: 16),
-                Text('${value.processed} / ${value.total} 장 처리 중'),
-                TextButton(
-                  onPressed: _cancelExtraction,
-                  child: const Text(_cancel),
-                ),
-              ],
-            ),
+        bottomNavigationBar: ActionFooter(
+          child: OutlinedButton(
+            onPressed: _cancelExtraction,
+            child: const Text(_cancel),
           ),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(AppSpacing.of(context).page),
+              child: BookContextHeader(bookId: widget.bookId),
+            ),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(AppSpacing.of(context).page),
+                  child: progress.when(
+                    loading: () => const CircularProgressIndicator(),
+                    error: (error, stackTrace) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(_failed),
+                        TextButton(
+                          onPressed: _start,
+                          child: const Text(_retry),
+                        ),
+                      ],
+                    ),
+                    data: (value) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(
+                          value: value.total == 0
+                              ? null
+                              : value.processed / value.total,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '${value.processed} / ${value.total} 장 처리 중',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        SizedBox(height: AppSpacing.of(context).section),
+                        Text(
+                          _reading,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        SizedBox(height: AppSpacing.of(context).small),
+                        Text(
+                          _local,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
