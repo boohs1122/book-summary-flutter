@@ -100,7 +100,7 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     await tester.enterText(find.byType(TextField), '나' * 101);
     await tester.pump();
-    expect(find.text('101자'), findsOneWidget);
+    expect(find.text('101 / 10,000자'), findsOneWidget);
   });
 
   testWidgets('short OCR text returns to capture with an explanation', (
