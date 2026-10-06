@@ -93,40 +93,10 @@ class _BookSelectionScreenState extends ConsumerState<BookSelectionScreen> {
   }
 
   Future<void> _createBook() async {
-    final controller = TextEditingController();
     final title = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text(_newBook),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 100,
-          decoration: const InputDecoration(labelText: _titlePrompt),
-          onSubmitted: (_) {
-            if (controller.text.trim().isNotEmpty) {
-              Navigator.pop(dialogContext, controller.text);
-            }
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text(_cancel),
-          ),
-          ValueListenableBuilder<TextEditingValue>(
-            valueListenable: controller,
-            builder: (_, value, _) => FilledButton(
-              onPressed: value.text.trim().isEmpty
-                  ? null
-                  : () => Navigator.pop(dialogContext, controller.text),
-              child: const Text(_create),
-            ),
-          ),
-        ],
-      ),
+      builder: (_) => const _NewBookDialog(),
     );
-    controller.dispose();
     if (title == null || !mounted) return;
     if (title.trim().isEmpty || title.trim().runes.length > 100) {
       ScaffoldMessenger.of(context)
@@ -248,4 +218,50 @@ class _BookSelectionList extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _NewBookDialog extends StatefulWidget {
+  const _NewBookDialog();
+  @override
+  State<_NewBookDialog> createState() => _NewBookDialogState();
+}
+
+class _NewBookDialogState extends State<_NewBookDialog> {
+  final _controller = TextEditingController();
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _confirm() {
+    if (_controller.text.trim().isNotEmpty) {
+      Navigator.pop(context, _controller.text);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text(_newBook),
+    content: TextField(
+      controller: _controller,
+      autofocus: true,
+      maxLength: 100,
+      decoration: const InputDecoration(labelText: _titlePrompt),
+      onSubmitted: (_) => _confirm(),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text(_cancel),
+      ),
+      ValueListenableBuilder<TextEditingValue>(
+        valueListenable: _controller,
+        builder: (_, value, _) => FilledButton(
+          onPressed: value.text.trim().isEmpty ? null : _confirm,
+          child: const Text(_create),
+        ),
+      ),
+    ],
+  );
 }
