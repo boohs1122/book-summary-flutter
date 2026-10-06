@@ -4,89 +4,89 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>책 요약 앱 화면 프로토타입</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
 <style>
 /* ============ M3 color roles ============ */
 :root{
-  --primary:#006A60;            --on-primary:#FFFFFF;
-  --primary-container:#9EF2E4;  --on-primary-container:#00201C;
-  --secondary:#4A635F;          --secondary-container:#CCE8E3;
-  --on-secondary-container:#06201C;
-  --tertiary:#456179;           --tertiary-container:#CBE6FF;
-  --error:#BA1A1A;              --on-error:#FFFFFF;
-  --error-container:#FFDAD6;    --on-error-container:#410002;
-  --surface:#F4FBF8;
+  --primary:#171717;            --on-primary:#FFFFFF;
+  --primary-container:#F5F5F5;  --on-primary-container:#171717;
+  --secondary:#171717;          --secondary-container:#F5F5F5;
+  --on-secondary-container:#171717;
+  --tertiary:#171717;           --tertiary-container:#F5F5F5;
+  --error:#171717;              --on-error:#FFFFFF;
+  --error-container:#F5F5F5;    --on-error-container:#171717;
+  --surface:#FFFFFF;
   --surface-container-lowest:#FFFFFF;
-  --surface-container-low:#EEF5F2;
-  --surface-container:#E8EFEC;
-  --surface-container-high:#E2E9E6;
-  --surface-container-highest:#DDE4E1;
-  --on-surface:#171D1B;         --on-surface-variant:#3F4947;
-  --outline:#6F7977;            --outline-variant:#BEC9C6;
-  --inverse-surface:#2B3230;    --inverse-on-surface:#ECF2EF;
+  --surface-container-low:#F5F5F5;
+  --surface-container:#F5F5F5;
+  --surface-container-high:#F0F0F0;
+  --surface-container-highest:#EAEAEA;
+  --on-surface:#171717;         --on-surface-variant:#656565;
+  --outline:#656565;            --outline-variant:#DEDEDE;
+  --inverse-surface:#171717;    --inverse-on-surface:#FFFFFF;
   --scrim:rgba(0,0,0,.32);
-  --page:#DCE4E1;
-  --kp-definition:#4F6470;  --kp-definition-bg:#E3EAEE;
-  --kp-mechanism:#3B4E9B;   --kp-mechanism-bg:#E2E6F8;
-  --kp-cause:#8F5510;       --kp-cause-bg:#F8EADA;
-  --kp-example:#2E6B3E;     --kp-example-bg:#DFF0E2;
-  --kp-comparison:#6B3F8F;  --kp-comparison-bg:#F0E5F8;
-  --kp-caution:#B3261E;     --kp-caution-bg:#FBE3E1;
+  --page:#ECECEC;
+  --kp-definition:var(--on-surface);  --kp-definition-bg:var(--surface-container-low);
+  --kp-mechanism:var(--on-surface);   --kp-mechanism-bg:var(--surface-container-low);
+  --kp-cause:var(--on-surface);       --kp-cause-bg:var(--surface-container-low);
+  --kp-example:var(--on-surface);     --kp-example-bg:var(--surface-container-low);
+  --kp-comparison:var(--on-surface);  --kp-comparison-bg:var(--surface-container-low);
+  --kp-caution:var(--on-surface);     --kp-caution-bg:var(--surface-container-low);
   --elev1:0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
   --elev2:0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
   --elev3:0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.30);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --primary:#82D5C8;            --on-primary:#003731;
-    --primary-container:#005048;  --on-primary-container:#9EF2E4;
-    --secondary:#B1CCC7;          --secondary-container:#324B47;
-    --on-secondary-container:#CCE8E3;
-    --tertiary:#ACCAE6;           --tertiary-container:#2D4960;
-    --error:#FFB4AB;              --on-error:#690005;
-    --error-container:#93000A;    --on-error-container:#FFDAD6;
-    --surface:#0E1513;
-    --surface-container-lowest:#090F0E;
-    --surface-container-low:#171D1B;
-    --surface-container:#1B211F;
-    --surface-container-high:#252B29;
-    --surface-container-highest:#303634;
-    --on-surface:#DDE4E1;         --on-surface-variant:#BEC9C6;
-    --outline:#889391;            --outline-variant:#3F4947;
-    --inverse-surface:#DDE4E1;    --inverse-on-surface:#2B3230;
-    --page:#060B0A;
-    --kp-definition:#AFC2CC;  --kp-definition-bg:#26333A;
-    --kp-mechanism:#A8B6F5;   --kp-mechanism-bg:#242C4D;
-    --kp-cause:#E0A45C;       --kp-cause-bg:#3A2A14;
-    --kp-example:#8FD3A0;     --kp-example-bg:#1B3524;
-    --kp-comparison:#D0AEF0;  --kp-comparison-bg:#2F2140;
-    --kp-caution:#F2B8B5;     --kp-caution-bg:#44201D;
+    --primary:#F4F4F4;            --on-primary:#131313;
+    --primary-container:#222222;  --on-primary-container:#F4F4F4;
+    --secondary:#F4F4F4;          --secondary-container:#222222;
+    --on-secondary-container:#F4F4F4;
+    --tertiary:#F4F4F4;           --tertiary-container:#222222;
+    --error:#F4F4F4;              --on-error:#131313;
+    --error-container:#222222;    --on-error-container:#F4F4F4;
+    --surface:#131313;
+    --surface-container-lowest:#131313;
+    --surface-container-low:#222222;
+    --surface-container:#222222;
+    --surface-container-high:#292929;
+    --surface-container-highest:#333333;
+    --on-surface:#F4F4F4;         --on-surface-variant:#B2B2B2;
+    --outline:#B2B2B2;            --outline-variant:#383838;
+    --inverse-surface:#F4F4F4;    --inverse-on-surface:#131313;
+    --page:#090909;
+    --kp-definition:var(--on-surface);  --kp-definition-bg:var(--surface-container-low);
+    --kp-mechanism:var(--on-surface);   --kp-mechanism-bg:var(--surface-container-low);
+    --kp-cause:var(--on-surface);       --kp-cause-bg:var(--surface-container-low);
+    --kp-example:var(--on-surface);     --kp-example-bg:var(--surface-container-low);
+    --kp-comparison:var(--on-surface);  --kp-comparison-bg:var(--surface-container-low);
+    --kp-caution:var(--on-surface);     --kp-caution-bg:var(--surface-container-low);
   }
 }
 :root[data-theme="dark"]{
-  --primary:#82D5C8;            --on-primary:#003731;
-  --primary-container:#005048;  --on-primary-container:#9EF2E4;
-  --secondary:#B1CCC7;          --secondary-container:#324B47;
-  --on-secondary-container:#CCE8E3;
-  --tertiary:#ACCAE6;           --tertiary-container:#2D4960;
-  --error:#FFB4AB;              --on-error:#690005;
-  --error-container:#93000A;    --on-error-container:#FFDAD6;
-  --surface:#0E1513;
-  --surface-container-lowest:#090F0E;
-  --surface-container-low:#171D1B;
-  --surface-container:#1B211F;
-  --surface-container-high:#252B29;
-  --surface-container-highest:#303634;
-  --on-surface:#DDE4E1;         --on-surface-variant:#BEC9C6;
-  --outline:#889391;            --outline-variant:#3F4947;
-  --inverse-surface:#DDE4E1;    --inverse-on-surface:#2B3230;
-  --page:#060B0A;
-  --kp-definition:#AFC2CC;  --kp-definition-bg:#26333A;
-  --kp-mechanism:#A8B6F5;   --kp-mechanism-bg:#242C4D;
-  --kp-cause:#E0A45C;     --kp-cause-bg:#3A2A14;
-  --kp-example:#8FD3A0;   --kp-example-bg:#1B3524;
-  --kp-comparison:#D0AEF0;  --kp-comparison-bg:#2F2140;
-  --kp-caution:#F2B8B5;   --kp-caution-bg:#44201D;
+  --primary:#F4F4F4;            --on-primary:#131313;
+  --primary-container:#222222;  --on-primary-container:#F4F4F4;
+  --secondary:#F4F4F4;          --secondary-container:#222222;
+  --on-secondary-container:#F4F4F4;
+  --tertiary:#F4F4F4;           --tertiary-container:#222222;
+  --error:#F4F4F4;              --on-error:#131313;
+  --error-container:#222222;    --on-error-container:#F4F4F4;
+  --surface:#131313;
+  --surface-container-lowest:#131313;
+  --surface-container-low:#222222;
+  --surface-container:#222222;
+  --surface-container-high:#292929;
+  --surface-container-highest:#333333;
+  --on-surface:#F4F4F4;         --on-surface-variant:#B2B2B2;
+  --outline:#B2B2B2;            --outline-variant:#383838;
+  --inverse-surface:#F4F4F4;    --inverse-on-surface:#131313;
+  --page:#090909;
+  --kp-definition:var(--on-surface);  --kp-definition-bg:var(--surface-container-low);
+  --kp-mechanism:var(--on-surface);   --kp-mechanism-bg:var(--surface-container-low);
+  --kp-cause:var(--on-surface);     --kp-cause-bg:var(--surface-container-low);
+  --kp-example:var(--on-surface);   --kp-example-bg:var(--surface-container-low);
+  --kp-comparison:var(--on-surface);  --kp-comparison-bg:var(--surface-container-low);
+  --kp-caution:var(--on-surface);   --kp-caution-bg:var(--surface-container-low);
 }
 
 *{box-sizing:border-box}
@@ -456,6 +456,15 @@ body{
 
 footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* v6: quiet hierarchy, hairlines and small radii */
+.appbar{border-bottom:1px solid var(--outline-variant)}
+.appbar h2{font-size:18px;font-weight:500}
+.btn,.opt,.qcard,.bookcard,.banner,.input,.newbook{border-radius:6px}
+.bookcard,.qcard{background:var(--surface);box-shadow:none;border-bottom:1px solid var(--outline-variant)}
+.bookcard .spine{background:var(--surface-container-low);border:1px solid var(--outline-variant)}
+.keypoint .d{font-size:14px;color:var(--on-surface)}
+.keypoint .kplabel{background:transparent;color:var(--on-surface-variant);font-weight:400;padding:0}
+.score .big{font-family:Georgia,serif;font-size:36px}
 </style>
 </head>
 <body>
@@ -478,7 +487,7 @@ footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
 
       <!-- ===== S1 홈 · 책 목록 ===== -->
       <div class="screen on" data-s="S1">
-        <div class="appbar"><h2>내 서재</h2></div>
+        <div class="appbar"><h2>내 책</h2></div>
         <div class="body">
           <div class="bookcard" data-goto="S2">
             <span class="spine"></span>
@@ -497,7 +506,7 @@ footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
           </div>
           <div style="height:80px"></div>
         </div>
-        <button class="fab" data-goto="S3" data-book="none"><span class="msym">photo_camera</span>바로 찍기</button>
+        <button class="fab" data-goto="S3" data-book="none"><span class="msym">photo_camera</span>책 사진 찍기</button>
         <div class="snack"><span></span></div>
       </div>
 
@@ -588,11 +597,12 @@ footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
           <div class="banner"><span class="msym">edit_note</span><span>잘못 읽힌 글자가 있으면 직접 고칠 수 있어요. 고친 내용으로 요약합니다.</span></div>
           <div class="counter"><span>추출된 글자</span><span><b>5,240</b> / 10,000자</span></div>
           <div class="field">
-            <span class="lbl">원문</span>
+            <span class="lbl">텍스트 수정</span>
             프로세스는 실행 중인 프로그램을 의미한다. 프로그램이 저장 장치에 담긴 정적인 코드라면, 프로세스는 메모리에 적재되어 CPU를 할당받는 동적인 실행 단위다.<br><br>
             운영체제는 프로세스를 다섯 가지 상태로 관리한다. 생성 상태에서 시작해 준비 상태로 진입하고, 스케줄러가 CPU를 할당하면 실행 상태가 된다. 입출력 요청이 발생하면 대기 상태로 전환되며, 작업이 끝나면 종료 상태로 이동한다.<br><br>
             각 프로세스의 상태 정보는 PCB(Process Control Block)라는 자료구조에 저장된다. PCB에는 프로세스 식별자, 프로그램 카운터, 레지스터 값, 메모리 관리 정보가 담긴다. 문맥 교환이 일어날 때 운영체제는 현재 프로세스의 PCB에 상태를 저장하고…
           </div>
+          <details style="margin-top:24px;border-top:1px solid var(--outline-variant);padding-top:16px"><summary>추출한 원문 보기</summary><p style="font-size:14px;line-height:1.8">프로세스는 실행 중인 프로그램을 의미한다. 프로그램이 저장 장치에 담긴 정적인 코드라면, 프로세스는 메모리에 적재되어 CPU를 할당받는 동적인 실행 단위다.</p></details>
         </div>
         <div class="bottombar">
           <button class="btn outlined" data-goto="S3">다시 찍기</button>
@@ -758,7 +768,7 @@ footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
     <div class="notes" id="notes"></div>
   </div>
 
-  <footer>Material Design 3 · 색 역할과 타입 스케일을 적용한 클릭 프로토타입. 실제 구현 전 흐름 검증용입니다.</footer>
+  <footer>v6 흑백 스타일의 흐름 참고용 프로토타입. 실제 앱 화면은 <a href="../design/verification/v6/index.html">에뮬레이터 검증 갤러리</a>에서 확인합니다. 구현·제약은 <a href="디자인검증_v6.md">검증 기록</a>를 참조합니다.</footer>
 </div>
 
 <script>
@@ -766,7 +776,7 @@ footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
   var SCREENS = [
     {id:"S1", name:"홈 · 책 목록", desc:"책 단위로 묶어서 보여준다. 한 권을 여러 번 나눠 촬영하므로 평면 목록으로는 권 구분과 진도 파악이 불가능하다.",
      points:["책 카드에 회차 수, 총 글자 수, 마지막 학습일, 최근 점수를 함께 표시","마지막 학습일 내림차순 정렬 — 최근에 본 책이 위로","검색은 1차 미도입. 1년을 써도 책 20권 내외라 목록 탐색으로 충분하다"],
-     m3:"책 카드는 <b>list item</b> 형태. 좌측 색 블록으로 권을 구분하고, 상태는 <b>badge</b>로."},
+     m3:"책은 흑백 목록 행과 얇은 선으로 구분한다. 실제 최근 점수는 작은 세리프 숫자로 표시한다."},
     {id:"S2", name:"책 상세 · 회차 목록", desc:"한 권의 회차를 순서대로 보여준다. 어디까지 봤는지가 이 화면의 핵심 정보다.",
      points:["회차 번호 오름차순 — 책은 순서대로 읽는 대상이다","실패 회차를 누르면 재촬영 없이 요약만 다시 요청","마지막 회차를 지워도 책은 유지하고 사용자가 직접 삭제"],
      m3:"회차 번호는 <b>leading element</b>로 고정 위치. 완료 회차만 primary-container로 채워 진도를 드러낸다."},
@@ -787,13 +797,13 @@ footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
      m3:"진행률을 알 수 없으므로 <b>indeterminate linear indicator</b>. 취소는 text button으로 낮춘다."},
     {id:"S8", name:"요약 보기", desc:"회차의 허브. 목록에서 들어와도, 채점을 마쳐도 이 화면으로 돌아온다.",
      points:["상단에 책 제목과 회차를 항상 표시하고 누르면 책으로 이동","제목은 내용을 특정할 수 있게 구체적으로 생성한다 — 탐색성을 제목이 담당한다","퀴즈 버튼을 누르면 화면 전환 없이 버튼 안에서 대기한다"],
-     m3:"색은 좌측 스트라이프와 라벨 칩에만 쓰고 본문에는 적용하지 않는다. 가장 빈번한 정의 유형에 중립색을 배정해 나머지가 눈에 띄게 한다."},
+     m3:"유형은 흑백 라벨로 구분한다. 본문은 Regular, 용어는 문단당 최대 두 곳 Semibold로 강조하며 기억할 핵심은 회색 영역과 얇은 선을 사용한다."},
     {id:"S9", name:"퀴즈 풀이", desc:"문항을 순서대로 푼다. 정답과 해설은 제출 전까지 내려오지 않는다.",
      points:["서버가 채점하므로 앱은 정답을 갖지 않는다","미응답 문항이 있으면 제출 시 확인","이탈하면 진행 상황 소실 경고"],
      m3:"선택지는 <b>outlined card</b> + 라디오. 선택 시 primary-container로 채운다."},
     {id:"S10", name:"채점 결과", desc:"점수와 문항별 정오답, 해설을 함께 보여준다.",
      points:["오답은 고른 답과 정답을 나란히 표시","재응시해도 기존 결과를 덮어쓰지 않고 누적","다시 풀기는 같은 문항을 다시 푼다"],
-     m3:"정오답은 색만으로 구분하지 않고 <b>아이콘</b>을 함께 쓴다. 점수는 display 크기로 강조."}
+     m3:"정오답은 아이콘과 텍스트로 구분한다. 오답을 먼저 펼치고 실제 점수와 격려 문구를 표시한다."}
   ];
 
   var bar = document.getElementById("bar");
@@ -825,6 +835,8 @@ footer{margin-top:40px;font-size:12px;color:var(--on-surface-variant)}
       b.setAttribute("aria-current", String(b.getAttribute("data-goto")===id));
     });
     renderNotes(id);
+    var summarize = document.getElementById("summarizeBtn");
+    if(summarize) summarize.textContent = bookAssigned ? "요약하기" : "책 선택하기";
     document.querySelectorAll(".snack.show").forEach(function(s){ s.classList.remove("show"); });
     var body = document.querySelector('.screen.on .body');
     if(body) body.scrollTop = 0;

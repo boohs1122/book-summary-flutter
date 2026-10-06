@@ -435,7 +435,7 @@ GET /documents/{documentId}
 ```
 
 `keyPoints[].type`은 `definition` · `mechanism` · `cause` ·
-`comparison` · `caution` · `example` 중 하나다. 클라이언트는 유형별로 색과 라벨을 달리해 표시하며, 정의되지 않은
+`comparison` · `caution` · `example` 중 하나다. 클라이언트 표현은 [화면 흐름 문서](02_화면흐름.md)의 디자인 규칙을 따르며, 정의되지 않은
 값이 오면 `definition`으로 취급한다.
 
 `quiz.exists`가 `false`이면 나머지 필드는 `null`.
