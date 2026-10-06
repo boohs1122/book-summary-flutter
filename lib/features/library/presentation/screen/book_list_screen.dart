@@ -172,31 +172,37 @@ class _PendingJobsBanner extends ConsumerWidget {
                 AppSpacing.of(context).page,
                 0,
               ),
-              child: Column(
-                children: [
-                  for (final job in items)
-                    ListTile(
-                      leading: const Icon(Icons.hourglass_top),
-                      title: Text(
-                        ref
-                                .watch(booksProvider)
-                                .value
-                                ?.where((book) => book.id == job.bookId)
-                                .firstOrNull
-                                ?.title ??
-                            _pendingLabel,
-                      ),
-                      subtitle: const Text(_pendingHint),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.push(
-                        AppRoutes.summaryProgressForJob(
-                          job.jobId,
-                          job.bookId,
-                          createdAt: job.createdAt,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.3,
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    for (final job in items)
+                      ListTile(
+                        leading: const Icon(Icons.hourglass_top),
+                        title: Text(
+                          ref
+                                  .watch(booksProvider)
+                                  .value
+                                  ?.where((book) => book.id == job.bookId)
+                                  .firstOrNull
+                                  ?.title ??
+                              _pendingLabel,
+                        ),
+                        subtitle: const Text(_pendingHint),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.push(
+                          AppRoutes.summaryProgressForJob(
+                            job.jobId,
+                            job.bookId,
+                            createdAt: job.createdAt,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
     );
